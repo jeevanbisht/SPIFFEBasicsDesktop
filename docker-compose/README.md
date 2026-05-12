@@ -253,4 +253,51 @@ docker compose down      # Stop containers, keep volumes (preserves CA state)
 
 ---
 
+## 🔧 Troubleshooting
+
+### Services won't start
+```bash
+# Check all container states
+docker compose ps
+
+# View specific service logs
+docker compose logs spire-server
+docker compose logs spire-agent
+docker compose logs spire-bootstrap
+```
+
+### "SPIRE not ready" error from frontend/backend
+The SPIRE Agent takes ~15 seconds after the server is healthy. Wait and retry:
+```bash
+docker compose logs -f spire-agent | grep -i "connected\|attestation\|error"
+```
+
+### Frontend returns 502 (can't reach backend)
+Registration entries may not be created yet. Check bootstrap:
+```bash
+docker compose logs spire-bootstrap
+# Look for "Bootstrap Complete" — if missing, bootstrap failed
+```
+Re-run bootstrap manually:
+```bash
+docker compose run --rm spire-bootstrap
+```
+
+### "SSL routines: no certificate" when calling backend directly
+This is expected! The backend enforces mTLS. You must go through the frontend (which has a valid SVID), or present a valid SVID yourself. This is the point of Lab 5.
+
+### Port 3000 already in use
+```bash
+docker compose down -v   # Stop and remove volumes
+# Then change the port mapping in docker-compose.yml: "3001:3000"
+```
+
+### Docker socket permission denied (on Linux)
+```bash
+sudo usermod -aG docker $USER
+# Log out and back in, then retry
+```
+
+---
+
 ## ▶️ Next: [Track B — kind/Kubernetes](../kind/README.md)

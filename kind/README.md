@@ -172,4 +172,53 @@ kind delete clusters spiffe-lab cluster-a cluster-b
 
 ---
 
+## 🔧 Troubleshooting
+
+### SPIRE Server pod stuck in Pending
+```bash
+kubectl -n spire describe pod spire-server-0
+# Common cause: PVC not bound (storage class issue)
+# Fix: kind uses standard local-path storage — wait 30s or recreate cluster
+```
+
+### SPIRE Agent CrashLoopBackOff
+```bash
+kubectl -n spire logs -l app=spire-agent --previous
+# Common causes:
+# 1. Server not ready — agents start before server is healthy
+# 2. Token audience mismatch — check agent.conf token_path and projected volume audience
+```
+
+### `spire-server agent list` shows no agents
+k8s_psat attestation takes ~10 seconds. Wait and retry. If still empty:
+```bash
+kubectl -n spire logs spire-server-0 | grep -i "attestation\|error\|psat"
+```
+
+### `api fetch x509` returns "no identity issued"
+The workload has no matching registration entry. Check:
+```bash
+kubectl -n spire exec -it spire-server-0 -- \
+  /opt/spire/bin/spire-server entry show
+# Verify selectors match your workload's namespace/service account
+```
+
+### setup.sh fails at rollout status timeout
+```bash
+# Increase timeout or check events
+kubectl -n spire get events --sort-by='.lastTimestamp' | tail -20
+kind delete cluster --name spiffe-lab && ./setup.sh  # full reset
+```
+
+### kind cluster creation fails (port conflicts)
+```bash
+# Check if a cluster already exists
+kind get clusters
+# Delete and recreate
+kind delete cluster --name spiffe-lab
+./setup.sh
+```
+
+---
+
 ## ▶️ Ready for Cloud? [SPIFFEBasics — Azure Tutorial](https://github.com/jeevanbisht/SPIFFEBasics)
