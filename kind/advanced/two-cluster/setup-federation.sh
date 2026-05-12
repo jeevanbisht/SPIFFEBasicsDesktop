@@ -19,12 +19,17 @@ kind create cluster --name cluster-a --config cluster-a/kind-config.yaml 2>/dev/
 kubectl config use-context kind-cluster-a
 
 kubectl apply -f cluster-a/namespace.yaml
+kubectl apply -f ../../spire/k8s/server-service-account.yaml
+kubectl apply -f ../../spire/k8s/server-cluster-role.yaml
 kubectl apply -f cluster-a/server-configmap.yaml
 kubectl apply -f cluster-a/server-statefulset.yaml
 kubectl apply -f cluster-a/server-service.yaml
+kubectl apply -f ../../spire/k8s/agent-service-account.yaml
+kubectl apply -f ../../spire/k8s/agent-cluster-role.yaml
 kubectl apply -f cluster-a/agent-configmap.yaml
 kubectl apply -f cluster-a/agent-daemonset.yaml
 kubectl -n spire rollout status statefulset/spire-server --timeout=120s
+kubectl -n spire rollout status daemonset/spire-agent --timeout=120s
 ok "Cluster A: SPIRE running"
 
 # ─── Create Cluster B ──────────────────────────────────────────────────────
@@ -35,12 +40,17 @@ kind create cluster --name cluster-b --config cluster-b/kind-config.yaml 2>/dev/
 kubectl config use-context kind-cluster-b
 
 kubectl apply -f cluster-b/namespace.yaml
+kubectl apply -f ../../spire/k8s/server-service-account.yaml
+kubectl apply -f ../../spire/k8s/server-cluster-role.yaml
 kubectl apply -f cluster-b/server-configmap.yaml
 kubectl apply -f cluster-b/server-statefulset.yaml
 kubectl apply -f cluster-b/server-service.yaml
+kubectl apply -f ../../spire/k8s/agent-service-account.yaml
+kubectl apply -f ../../spire/k8s/agent-cluster-role.yaml
 kubectl apply -f cluster-b/agent-configmap.yaml
 kubectl apply -f cluster-b/agent-daemonset.yaml
 kubectl -n spire rollout status statefulset/spire-server --timeout=120s
+kubectl -n spire rollout status daemonset/spire-agent --timeout=120s
 ok "Cluster B: SPIRE running"
 
 # ─── Configure Federation ─────────────────────────────────────────────────

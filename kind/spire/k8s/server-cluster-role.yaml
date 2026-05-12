@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: spire-controller-manager-role
+rules:
+  - apiGroups: ["spiffe.io"]
+    resources: ["clusterspiffeids", "clusterspiffeids/status", "clusterfederatedtrustdomains", "clusterfederatedtrustdomains/status"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    verbs: ["get", "list", "patch", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spire-controller-manager-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: spire-controller-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: spire-server
+    namespace: spire

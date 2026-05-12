@@ -1,0 +1,15 @@
+# ClusterSPIFFEID — automatically issues SVIDs to matching workloads
+# Requires SPIRE Controller Manager (included in SPIRE Helm chart)
+# For standalone kind setup, this demonstrates auto-registration
+apiVersion: spiffe.io/v1alpha1
+kind: ClusterSPIFFEID
+metadata:
+  name: default-workloads
+spec:
+  spiffeIDTemplate: "spiffe://example.org/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}"
+  workloadSelectorTemplates:
+    - "k8s:ns:default"
+    - "k8s:ns:demo"
+  dnsNameTemplates:
+    - "{{ .PodMeta.Name }}.{{ .PodMeta.Namespace }}.svc.cluster.local"
+  ttl: "1h"
