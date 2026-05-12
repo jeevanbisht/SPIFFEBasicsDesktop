@@ -1,0 +1,131 @@
+version: "3.9"
+
+# ─── SPIFFE/SPIRE Standalone Demo ─────────────────────────────────────────
+# Everything you need to learn SPIFFE/SPIRE on a single machine.
+# Requirements: Docker Desktop only.
+#
+# Usage:
+#   docker compose up -d          # Start all services
+#   docker compose logs -f        # Watch logs
+#   docker compose down -v        # Stop and clean up
+
+networks:
+  spiffe-net:
+    driver: bridge
+
+volumes:
+  spire-data:   # SPIRE Server's SQLite database + CA keys
+  spire-sockets: # SPIRE Agent's Workload API Unix socket
+
+services:
+
+  # ─── SPIRE Server ──────────────────────────────────────────────────────
+  spire-server:
+    image: ghcr.io/spiffe/spire-server:1.9.6
+    hostname: spire-server
+    command: ["-config", "/opt/spire/conf/server/server.conf"]
+    volumes:
+      - ./spire/server.conf:/opt/spire/conf/server/server.conf:ro
+      - spire-data:/opt/spire/data
+    ports:
+      - "8081:8081"   # gRPC API (agents connect here)
+      - "8080:8080"   # Health check
+    networks:
+      - spiffe-net
+    healthcheck:
+      test: ["/opt/spire/bin/spire-server", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ─── SPIRE Agent ──────────────────────────────────────────────────────
+  # In Docker, we use a join_token for node attestation (simpler than k8s_psat)
+  # The token is pre-provisioned; in production you'd generate it dynamically
+  spire-agent:
+    image: ghcr.io/spiffe/spire-agent:1.9.6
+    hostname: spire-agent
+    command: ["-config", "/opt/spire/conf/agent/agent.conf"]
+    volumes:
+      - ./spire/agent.conf:/opt/spire/conf/agent/agent.conf:ro
+      - spire-sockets:/run/spire/sockets   # Shared socket for workloads
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For Docker workload attestor
+    networks:
+      - spiffe-net
+    depends_on:
+      spire-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["/opt/spire/bin/spire-agent", "healthcheck", "-socketPath", "/run/spire/sockets/agent.sock"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ─── Registration Bootstrap ──────────────────────────────────────────
+  # Creates registration entries for frontend and backend, then exits
+  spire-bootstrap:
+    image: ghcr.io/spiffe/spire-server:1.9.6
+    volumes:
+      - ./spire/bootstrap.sh:/bootstrap.sh:ro
+    networks:
+      - spiffe-net
+    depends_on:
+      spire-agent:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/bootstrap.sh"]
+    restart: "no"
+
+  # ─── Frontend Service ──────────────────────────────────────────────
+  frontend:
+    build: ./apps/frontend
+    hostname: frontend
+    environment:
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/sockets/agent.sock"
+      BACKEND_URL: "https://backend:8443"
+      TRUST_DOMAIN: "example.org"
+      SERVICE_NAME: "frontend"
+    volumes:
+      - spire-sockets:/run/spire/sockets:ro
+    ports:
+      - "3000:3000"   # Access from host: curl http://localhost:3000
+    networks:
+      - spiffe-net
+    depends_on:
+      spire-agent:
+        condition: service_healthy
+    labels:
+      # Docker workload attestor uses these labels to identify this container
+      spiffe.io/service: "frontend"
+      spiffe.io/env: "demo"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ─── Backend Service ───────────────────────────────────────────────
+  backend:
+    build: ./apps/backend
+    hostname: backend
+    environment:
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/sockets/agent.sock"
+      TRUST_DOMAIN: "example.org"
+      SERVICE_NAME: "backend"
+    volumes:
+      - spire-sockets:/run/spire/sockets:ro
+    networks:
+      - spiffe-net
+    depends_on:
+      spire-agent:
+        condition: service_healthy
+    labels:
+      spiffe.io/service: "backend"
+      spiffe.io/env: "demo"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8444/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
