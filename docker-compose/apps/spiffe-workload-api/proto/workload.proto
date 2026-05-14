@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+service SpiffeWorkloadAPI {
+  // Fetch X.509-SVIDs for all identities the workload is entitled to, as
+  // well as related trust bundles and CRLs. As this information changes,
+  // subsequent messages will be streamed.
+  rpc FetchX509SVID(X509SVIDRequest) returns (stream X509SVIDResponse);
+
+  // Fetch trust bundles and CRLs. As this information changes, subsequent
+  // messages will be streamed.
+  rpc FetchX509Bundles(X509BundlesRequest) returns (stream X509BundlesResponse);
+}
+
+message X509SVIDRequest {}
+
+message X509SVIDResponse {
+  repeated X509SVID svids = 1;
+  repeated string crl = 2;
+  map<string, bytes> federated_bundles = 3;
+}
+
+message X509SVID {
+  // The SPIFFE ID of the SVID in this entry
+  string spiffe_id = 1;
+  // ASN.1 DER encoded certificate chain
+  bytes x509_svid = 2;
+  // ASN.1 DER encoded PKCS#8 private key
+  bytes x509_svid_key = 3;
+  // ASN.1 DER encoded X.509 bundle for the trust domain
+  bytes bundle = 4;
+}
+
+message X509BundlesRequest {}
+
+message X509BundlesResponse {
+  map<string, bytes> bundles = 1;
+  repeated string crl = 2;
+}

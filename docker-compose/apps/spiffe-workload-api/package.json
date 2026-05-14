@@ -1,0 +1,10 @@
+{
+  "name": "@spiffe/spiffe-workload-api",
+  "version": "1.0.0",
+  "description": "Node.js client for the SPIFFE Workload API (gRPC)",
+  "main": "index.js",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.9.0",
+    "@grpc/proto-loader": "^0.7.0"
+  }
+}

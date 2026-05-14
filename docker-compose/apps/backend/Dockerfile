@@ -1,8 +1,10 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json .
-RUN npm install --production
-COPY src/ src/
-USER node
+COPY spiffe-workload-api/ spiffe-workload-api/
+COPY backend/package.json .
+RUN npm install --omit=dev
+COPY backend/src/ src/
+RUN adduser -D -u 10002 backend && chown -R backend:backend /app
+USER backend
 EXPOSE 8443 8444
 CMD ["node", "src/index.js"]

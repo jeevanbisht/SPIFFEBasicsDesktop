@@ -119,10 +119,13 @@ app.get('/demo', async (_req, res) => {
 });
 
 // ─── Start ─────────────────────────────────────────────────────────────────
-connect().then(() => {
-  app.listen(PORT, () => console.log(`[frontend] 🚀 Listening on http://localhost:${PORT}`));
-}).catch(err => {
-  console.error('[frontend] Failed to start:', err.message);
-  // Retry after 5s if SPIRE Agent isn't ready yet
-  setTimeout(() => { connect().catch(console.error); }, 5000);
-});
+function start() {
+  connect().then(() => {
+    app.listen(PORT, () => console.log(`[frontend] 🚀 Listening on http://localhost:${PORT}`));
+  }).catch(err => {
+    console.error('[frontend] Failed to start:', err.message);
+    // Retry after 5s if SPIRE Agent isn't ready yet
+    setTimeout(start, 5000);
+  });
+}
+start();
