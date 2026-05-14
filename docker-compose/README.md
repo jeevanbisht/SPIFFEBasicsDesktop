@@ -353,6 +353,16 @@ Verify it was created:
 docker compose run --rm --entrypoint sh spire-bootstrap -c "/opt/spire/bin/spire-server entry show -socketPath /tmp/spire-server/private/api.sock | grep -A5 inventory"
 ```
 
+You'll see:
+```
+SPIFFE ID        : spiffe://example.org/service/inventory
+Parent ID        : spiffe://example.org/spire/agent/join_token/6eeefc10-3d13-43f3-8532-2039d3cb4d57
+Revision         : 0
+X509-SVID TTL    : 3600
+JWT-SVID TTL     : default
+Selector         : unix:uid:10003
+```
+
 **What this teaches:**
 - Registration entries are the **authorization policy** — they decide who gets which identity
 - The `unix:uid` selector tells SPIRE: "any process running as UID 10003 gets this SPIFFE ID"
