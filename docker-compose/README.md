@@ -24,6 +24,18 @@ This lab walks you through the core SPIFFE concepts step by step:
 - **curl** (included on most systems)
 - That's it. Everything else runs in containers.
 
+> **Windows users:** The commands below use bash syntax. On Windows CMD or
+> PowerShell, remove `#` comment lines, join `\` continuation lines into a
+> single line, and remove the `\`. For example:
+> ```bash
+> # bash (Mac/Linux):
+> docker compose exec frontend sh -c \
+>   'openssl x509 -in /tmp/svid.0.pem -text -noout | grep -A1 "Subject Alternative Name"'
+>
+> # Windows CMD or PowerShell (single line, no backslash):
+> docker compose exec frontend sh -c "openssl x509 -in /tmp/svid.0.pem -text -noout | grep -A1 'Subject Alternative Name'"
+> ```
+
 ---
 
 ## Quick Start
