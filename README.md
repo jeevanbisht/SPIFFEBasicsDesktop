@@ -51,28 +51,28 @@ In modern distributed systems, **services need to prove who they are** to other 
 
 ## 📐 Architecture Overview
 
-```mermaid
-graph LR
-    subgraph SPIRE Architecture
-        subgraph Server["SPIRE Server"]
-            CA["• CA / PKI"]
-            REG["• Registry"]
-            POL["• Policies"]
-        end
-
-        subgraph Node
-            subgraph Agent["SPIRE Agent"]
-                ATT["• Attests"]
-                ISS["• Issues SVIDs"]
-            end
-            subgraph WL["Workload (your app)"]
-                SVID["Gets SVID"]
-            end
-        end
-    end
-
-    Server -- "mTLS" --- Agent
-    Agent -- "Workload API\n(Unix socket)" --- WL
+```
++----------------------------------------------------------------+
+|                      SPIRE Architecture                        |
+|                                                                |
+|  +--------------+          +-----------------------------+     |
+|  | SPIRE Server |          |           Node              |     |
+|  |              |<-------->|  +-------------+            |     |
+|  |  - CA / PKI  |   mTLS   |  | SPIRE Agent |            |     |
+|  |  - Registry  |          |  |             |<-----+     |     |
+|  |  - Policies  |          |  | - Attests   |      |     |     |
+|  +--------------+          |  | - Issues    |  Workload  |     |
+|                            |  |   SVIDs     |  API (Unix |     |
+|                            |  +-------------+  socket)   |     |
+|                            |        ^           |        |     |
+|                            |        |    +------v------+ |     |
+|                            |        |    |  Workload   | |     |
+|                            |        |    |  (your app) | |     |
+|                            |        |    |             | |     |
+|                            |        |    |  Gets SVID  | |     |
+|                            |        +----+-------------+ |     |
+|                            +-----------------------------+     |
++----------------------------------------------------------------+
 ```
 
 ### Key Concepts at a Glance
