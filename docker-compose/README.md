@@ -1,121 +1,147 @@
-# Track A — Docker Compose
+# SPIFFE/SPIRE Hands-On Lab — Docker Compose
 
-> **No Kubernetes. No cloud. Just Docker Desktop.**
-> Everything runs on your laptop in under 2 minutes.
+> **Learn SPIFFE identity and mTLS by doing.**
+> No Kubernetes. No cloud. Just Docker Desktop on your laptop.
+
+This lab walks you through the core SPIFFE concepts step by step:
+
+| Lab | Concept | What You'll Do |
+|-----|---------|----------------|
+| 1 | **SPIFFE Identity** | See a workload's cryptographic identity |
+| 2 | **Mutual TLS (mTLS)** | Watch two services authenticate with zero passwords |
+| 3 | **X.509 Certificates** | Inspect the actual cert with `openssl` |
+| 4 | **Trust Bundles** | Verify the certificate chain |
+| 5 | **Zero Trust** | Try to call a service without a valid identity |
+| 6 | **Automatic Rotation** | Watch SPIRE rotate certificates live |
+| 7 | **Registration** | Register a new service and see it get an identity |
+| 8 | **SPIRE Internals** | Explore the server's state — entries, agents, CAs |
 
 ---
 
-## ⚡ Start
+## Prerequisites
+
+- **Docker Desktop** (Windows, Mac, or Linux) — [Install](https://docs.docker.com/get-docker/)
+- **curl** (included on most systems)
+- That's it. Everything else runs in containers.
+
+---
+
+## Quick Start
 
 ```bash
 cd docker-compose/
 
-# Build images and start all services
+# Start everything (first run downloads images, ~2 minutes)
 docker compose up -d --build
 
-# Watch everything come up (~60 seconds)
-docker compose logs -f
-
-# Once you see "Bootstrap Complete", you're ready:
-curl http://localhost:3000/demo
-```
-
----
-
-## What's Running
-
-```
+# Wait for all services to become healthy (~60 seconds)
+# Check with:
 docker compose ps -a
-
-NAME              STATUS
-spire-server      healthy   ← CA + registry for the trust domain
-spire-init        exited 0  ← Generated join token for the agent, done
-spire-agent       healthy   ← Issues SVIDs to workloads on this "node"
-spire-bootstrap   exited 0  ← Created registration entries, done its job
-frontend          healthy   ← Has SPIFFE ID, calls backend over mTLS
-backend           healthy   ← Has SPIFFE ID, enforces mTLS + SPIFFE auth
 ```
+
+You should see:
+```
+NAME              STATUS
+spire-server      healthy   ← Certificate Authority for the trust domain
+spire-init        exited 0  ← Generated a join token for the agent
+spire-agent       healthy   ← Issues SVIDs to workloads on this node
+spire-bootstrap   exited 0  ← Registered the frontend and backend
+frontend          healthy   ← Has a SPIFFE identity, calls backend over mTLS
+backend           healthy   ← Has a SPIFFE identity, enforces mTLS
+```
+
+> **Tip:** If frontend or backend show `unhealthy`, wait 15 seconds and check
+> again — they retry until bootstrap registers their identities.
 
 ---
 
-## Lab 1: See Your First SVID
+## Lab 1: See Your First SPIFFE Identity
+
+**Concept:** Every workload gets a cryptographic identity called an **SVID**
+(SPIFFE Verifiable Identity Document). No passwords, no API keys — just a
+certificate automatically issued by SPIRE.
 
 ```bash
-# Ask the frontend what its cryptographic identity is
-curl -s http://localhost:3000/my-identity | python3 -m json.tool
+curl -s http://localhost:3000/my-identity
 ```
 
-Expected output:
+You'll see:
 ```json
 {
   "spiffeId": "spiffe://example.org/service/frontend",
-  "expiresAt": "2024-01-15T11:00:00.000Z",
+  "expiresAt": "2026-05-14T04:00:00.000Z",
   "trustDomain": "example.org",
   "message": "👆 My cryptographic identity — no passwords needed!"
 }
 ```
 
-The frontend has a real X.509 certificate with SPIFFE ID in its SAN field — issued by SPIRE, valid for 1 hour, auto-rotating.
+**What just happened?**
+- The frontend asked the SPIRE Agent for its identity via a Unix socket
+- The agent verified the frontend's process and issued an X.509 certificate
+- The certificate contains the SPIFFE ID (`spiffe://example.org/service/frontend`) in its SAN field
+- It expires in 1 hour and will be automatically renewed
 
 ---
 
-## Lab 2: Call the Backend Over mTLS
+## Lab 2: Mutual TLS — Two Services Authenticate Each Other
+
+**Concept:** In **mTLS**, both client and server present certificates.
+The frontend proves who it is to the backend, and the backend proves who it is
+to the frontend. Neither side needs a password.
 
 ```bash
-# Frontend calls backend — both sides present SPIFFE SVIDs
-curl -s http://localhost:3000/orders | python3 -m json.tool
+curl -s http://localhost:3000/orders
 ```
 
-Expected output:
+You'll see:
 ```json
 {
   "calledBy": "spiffe://example.org/service/frontend",
   "servedBy": "spiffe://example.org/service/backend",
-  "orders": [...],
+  "orders": [
+    { "id": "ORD-001", "item": "Widget A", "qty": 5, "status": "shipped" }
+  ],
   "note": "🔒 This response was served over mTLS — both sides presented SPIFFE SVIDs"
 }
 ```
 
-Both `calledBy` and `servedBy` are SPIFFE IDs — **zero passwords, zero API keys.**
+**What just happened?**
+- The frontend presented its SVID to the backend as a TLS client certificate
+- The backend verified it against the SPIRE trust bundle ✅
+- The backend presented its SVID back to the frontend
+- The frontend verified the backend's identity ✅
+- **Zero passwords or API keys were exchanged** — both sides used SPIFFE certificates
+
+Try the full demo endpoint to see both identities side by side:
+```bash
+curl -s http://localhost:3000/demo
+```
 
 ---
 
-## Lab 3: Inspect the Actual Certificate
+## Lab 3: Inspect the Certificate with OpenSSL
 
-The app containers don't have `spire-agent` CLI, so we use Node.js to fetch
-the SVID via the Workload API and write PEM files that `openssl` can read.
+**Concept:** A SPIFFE SVID is a standard X.509 certificate. The SPIFFE ID
+lives in the **Subject Alternative Name (SAN)** URI field. Let's examine it
+with `openssl` — the same tool you'd use for any TLS certificate.
 
 ```bash
-# Step 1 — Install openssl in the frontend container (temporary, lost on restart)
-docker exec -u root docker-compose-frontend-1 apk add --no-cache openssl
+# Step 1 — Fetch the SVID from the SPIRE Agent and write PEM files
+docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
+```
 
-# Step 2 — Fetch the SVID and write PEM files to /tmp/
-docker compose exec frontend node -e "
-const grpc=require('@grpc/grpc-js'), pl=require('@grpc/proto-loader'), fs=require('fs');
-const p=pl.loadSync('/app/spiffe-workload-api/proto/workload.proto',
-  {keepCase:false,longs:String,enums:String,defaults:true,oneofs:true});
-const d=grpc.loadPackageDefinition(p);
-const c=new d.SpiffeWorkloadAPI('unix:///run/spire/sockets/agent.sock',grpc.credentials.createInsecure());
-const m=new grpc.Metadata(); m.set('workload.spiffe.io','true');
-function derToPem(buf,t){const b=Buffer.from(buf).toString('base64');
-  return '-----BEGIN '+t+'-----\n'+b.match(/.{1,64}/g).join('\n')+'\n-----END '+t+'-----\n'}
-function splitDer(buf){const c=[];let o=0;while(o<buf.length){if(buf[o]!==0x30)break;
-  let lo=o+1,l;if(buf[lo]<128){l=buf[lo];lo++}else{const n=buf[lo]&127;l=0;
-  for(let i=0;i<n;i++)l=(l<<8)|buf[lo+1+i];lo+=1+n}c.push(buf.slice(o,o+(lo-o+l)));
-  o+=lo-o+l}return c}
-const s=c.fetchX509Svid({},m);
-s.on('data',r=>{const v=r.svids[0];
-  splitDer(Buffer.from(v.x509Svid)).forEach((d,i)=>fs.writeFileSync('/tmp/svid.'+i+'.pem',derToPem(d,'CERTIFICATE')));
-  fs.writeFileSync('/tmp/svid.key.pem',derToPem(Buffer.from(v.x509SvidKey),'PRIVATE KEY'));
-  splitDer(Buffer.from(v.bundle)).forEach((d,i)=>fs.writeFileSync('/tmp/bundle.'+i+'.pem',derToPem(d,'CERTIFICATE')));
-  console.log('Wrote certs to /tmp/'); process.exit(0)});
-s.on('error',e=>{console.error(e.message);process.exit(1)});
-setTimeout(()=>process.exit(1),5000);
-"
+Output:
+```
+SPIFFE ID : spiffe://example.org/service/frontend
+Certificate: /tmp/svid.0.pem
+Private key: /tmp/svid.key.pem
+CA bundle  : /tmp/bundle.0.pem
+```
 
-# Step 3 — Inspect the certificate
-docker compose exec frontend openssl x509 -in /tmp/svid.0.pem -text -noout \
-  | grep -A3 "Subject Alternative Name"
+```bash
+# Step 2 — Find the SPIFFE ID in the certificate's SAN field
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -text -noout | grep -A1 "Subject Alternative Name"
 ```
 
 Expected:
@@ -125,166 +151,212 @@ X509v3 Subject Alternative Name:
 ```
 
 ```bash
-# Check the 1-hour validity window
-docker compose exec frontend openssl x509 -in /tmp/svid.0.pem -text -noout \
-  | grep -E "Not Before|Not After"
-
-# Verify it chains to SPIRE's CA (trust bundle)
-docker compose exec frontend openssl verify -CAfile /tmp/bundle.0.pem /tmp/svid.0.pem
-# Expected: /tmp/svid.0.pem: OK
+# Step 3 — Check the validity window (1-hour TTL)
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -text -noout | grep -E "Not Before|Not After"
 ```
+
+```bash
+# Step 4 — See all certificate details
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -text -noout
+```
+
+**Key things to notice:**
+- **Subject Alternative Name** → `URI:spiffe://...` — this is the SPIFFE ID
+- **Issuer** → `SPIFFE Standalone Tutorial` — signed by SPIRE's CA
+- **Key Usage** → TLS Web Server + Client Authentication — enables mTLS
+- **Validity** → ~1 hour — short-lived, auto-rotated
 
 ---
 
-## Lab 4: Decode a JWT-SVID
+## Lab 4: Verify the Trust Chain
 
-The SPIRE Workload API also issues JWT-SVIDs. We fetch one using gRPC from Node.js:
+**Concept:** SPIRE acts as a **Certificate Authority (CA)**. Every SVID chains
+back to SPIRE's trust bundle. This is how services know to trust each other.
 
 ```bash
-docker compose exec frontend node -e "
-const grpc=require('@grpc/grpc-js'), pl=require('@grpc/proto-loader');
-// The JWT-SVID API uses FetchJWTSVID — but in this demo the agent only
-// exposes X.509-SVIDs via the streaming API. Instead, let's inspect the
-// X.509 SVID's SPIFFE claims which serve the same purpose:
-const crypto=require('crypto'), fs=require('fs');
-try {
-  const pem = fs.readFileSync('/tmp/svid.0.pem','utf8');
-  const cert = new crypto.X509Certificate(pem);
-  console.log(JSON.stringify({
-    spiffeId: cert.subjectAltName,
-    subject: cert.subject,
-    issuer: cert.issuer,
-    validFrom: cert.validFrom,
-    validTo: cert.validTo,
-    keyUsage: cert.keyUsage,
-    serialNumber: cert.serialNumber,
-    note: 'X.509-SVID — identity encoded in SAN URI, auto-rotated by SPIRE'
-  }, null, 2));
-} catch(e) { console.error('Run Lab 3 first to write cert files'); }
-"
+# Verify the frontend's SVID was signed by SPIRE's CA
+docker compose exec frontend \
+  openssl verify -CAfile /tmp/bundle.0.pem /tmp/svid.0.pem
 ```
 
-> **Note:** JWT-SVIDs require the `FetchJWTSVID` RPC which uses a different
-> proto definition. For this desktop demo, X.509-SVIDs are the primary
-> identity mechanism — they enable mTLS between frontend and backend.
+Expected:
+```
+/tmp/svid.0.pem: OK
+```
+
+```bash
+# Inspect the CA certificate itself
+docker compose exec frontend \
+  openssl x509 -in /tmp/bundle.0.pem -text -noout | grep -E "Subject:|Issuer:|CA:"
+```
+
+**What this proves:**
+- SPIRE signed the frontend's certificate with its CA key
+- Any service that has the trust bundle can verify the frontend's identity
+- **No shared secrets** — trust is established through the certificate chain, not passwords
+
+> **Run Lab 3 first** — it writes the PEM files that this lab uses.
 
 ---
 
-## Lab 5: Break It — What Happens Without a Valid SVID?
+## Lab 5: Zero Trust — What Happens Without a Valid Identity?
 
-The backend enforces mTLS — **every caller must present a valid SPIFFE SVID**.
+**Concept:** In a zero-trust architecture, **every connection must be
+authenticated**. No valid SVID = no access. Let's prove it.
 
 ```bash
-# Try calling backend's health endpoint (plain HTTP, no mTLS) — works
-docker compose exec backend sh -c \
-  "wget -qO- http://localhost:8444/health"
-# {"status":"ok"}
+# The backend's health endpoint works (plain HTTP, no mTLS required)
+docker compose exec backend wget -qO- http://localhost:8444/health
+# → {"status":"ok"}
 
-# Try calling backend's protected mTLS endpoint without a cert — fails
-# (from the host, the mTLS port isn't exposed, so we test from inside the network)
+# But the protected /orders endpoint requires mTLS with a valid SPIFFE SVID.
+# Try calling it without presenting any certificate:
 docker compose exec frontend sh -c \
-  "wget -qO- --no-check-certificate https://backend:8443/orders 2>&1 || echo 'REJECTED — no client certificate!'"
-
-# The call fails because wget doesn't present a SPIFFE SVID.
-# Only workloads with a valid SVID issued by SPIRE can connect.
+  'wget --timeout=3 -qO- --no-check-certificate https://backend:8443/orders 2>&1; echo "Exit: $?"'
 ```
 
-This is the zero-trust model: **no valid SVID = no access.** No passwords, API keys, or IP allowlists.
+The call is **rejected**. The backend requires a client certificate issued by
+SPIRE's CA with a valid SPIFFE ID.
+
+```bash
+# Try with openssl s_client — connect but don't present a client cert:
+docker compose exec frontend sh -c \
+  'echo | openssl s_client -connect backend:8443 2>&1 | grep -E "alert|error|Verify"'
+# The TLS handshake fails — the server demands a client certificate
+
+# Now try via the frontend (which has a valid SVID) — it works:
+curl -s http://localhost:3000/orders | head -1
+```
+
+**The lesson:** Without a SPIFFE identity, you can't talk to protected
+services. No firewall rules, no VPN, no shared passwords — just cryptographic
+proof of identity.
 
 ---
 
-## Lab 6: Watch SVID Rotation
+## Lab 6: Watch Certificate Rotation
+
+**Concept:** SPIRE automatically **rotates certificates** before they expire.
+Services never have to restart — they get fresh certs transparently.
 
 ```bash
-# Terminal 1 — watch the frontend's SVID identity and expiry (refreshes every 10s)
-docker compose exec frontend node -e "
-const grpc=require('@grpc/grpc-js'), pl=require('@grpc/proto-loader'), crypto=require('crypto');
-const p=pl.loadSync('/app/spiffe-workload-api/proto/workload.proto',
-  {keepCase:false,longs:String,enums:String,defaults:true,oneofs:true});
-const d=grpc.loadPackageDefinition(p);
-const c=new d.SpiffeWorkloadAPI('unix:///run/spire/sockets/agent.sock',grpc.credentials.createInsecure());
-const m=new grpc.Metadata(); m.set('workload.spiffe.io','true');
-const s=c.fetchX509Svid({},m);
-s.on('data',r=>{
-  const v=r.svids[0];
-  function splitDer(buf){const c=[];let o=0;while(o<buf.length){if(buf[o]!==0x30)break;
-    let lo=o+1,l;if(buf[lo]<128){l=buf[lo];lo++}else{const n=buf[lo]&127;l=0;
-    for(let i=0;i<n;i++)l=(l<<8)|buf[lo+1+i];lo+=1+n}c.push(buf.slice(o,o+(lo-o+l)));
-    o+=lo-o+l}return c}
-  const der=splitDer(Buffer.from(v.x509Svid))[0];
-  const b=Buffer.from(der).toString('base64');
-  const pem='-----BEGIN CERTIFICATE-----\n'+b.match(/.{1,64}/g).join('\n')+'\n-----END CERTIFICATE-----';
-  const cert=new crypto.X509Certificate(pem);
-  console.log(new Date().toISOString(),
-    'SPIFFE ID:', v.spiffeId,
-    '| Valid:', cert.validFrom, '->', cert.validTo,
-    '| Serial:', cert.serialNumber);
-});
-"
-
-# Terminal 2 — watch SPIRE Agent logs for rotation events
-docker compose logs -f spire-agent | grep -i "svid\|rotat\|renew"
+# Fetch the SVID and note the serial number + expiry
+docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -noout -serial -dates
 ```
 
-At ~30 minutes (50% of the 1-hour TTL), the agent proactively fetches a new SVID.
-The serial number changes but the SPIFFE ID stays the same — seamless rotation.
+Note the serial number and `notAfter` time.
+
+```bash
+# In a second terminal, watch the agent logs for rotation events:
+docker compose logs -f spire-agent 2>&1 | grep -i "svid\|rotat\|renew"
+```
+
+After ~30 minutes (50% of the 1-hour TTL), SPIRE proactively rotates the cert.
+Re-run the fetch command — the serial number changes, but the SPIFFE ID stays
+the same.
+
+```bash
+# After rotation, fetch again:
+docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -noout -serial -dates
+# Serial number changed, SPIFFE ID unchanged — seamless rotation!
+```
+
+**Key takeaway:** No human intervention, no downtime, no secret distribution.
+SPIRE handles the entire lifecycle.
 
 ---
 
-## Lab 7: Add a New Service
+## Lab 7: Register a New Service
 
-Register a third service (`inventory`) and see it get an SVID.
-
-The SPIRE Server image is minimal (no shell), so we run `spire-server` CLI
-commands via the bootstrap container which has the binary and access to the
-server's API socket.
+**Concept:** Before a workload can get an identity, an admin must create a
+**registration entry** that maps a selector (how to identify the process) to a
+SPIFFE ID.
 
 ```bash
-# Create a registration entry for inventory (using unix:uid selector)
+# List current entries — you'll see frontend and backend
+docker compose run --rm spire-bootstrap sh -c \
+  '/opt/spire/bin/spire-server entry show \
+    -socketPath /tmp/spire-server/private/api.sock'
+
+# Register a new "inventory" service
 docker compose run --rm spire-bootstrap sh -c '
+  AGENT_ID=$(/opt/spire/bin/spire-server agent list \
+    -socketPath /tmp/spire-server/private/api.sock 2>/dev/null \
+    | grep "SPIFFE ID" | head -1 | awk "{print \$NF}")
   /opt/spire/bin/spire-server entry create \
     -socketPath /tmp/spire-server/private/api.sock \
-    -parentID "spiffe://example.org/spire/agent/join_token/$(
-      /opt/spire/bin/spire-server agent list \
-        -socketPath /tmp/spire-server/private/api.sock 2>/dev/null \
-        | grep "SPIFFE ID" | head -1 | sed "s|.*join_token/||"
-    )" \
+    -parentID "$AGENT_ID" \
     -spiffeID "spiffe://example.org/service/inventory" \
     -selector "unix:uid:10003" \
-    -ttl 3600
-'
+    -ttl 3600'
 
 # Verify it was created
-docker compose run --rm spire-bootstrap sh -c '
-  /opt/spire/bin/spire-server entry show \
-    -socketPath /tmp/spire-server/private/api.sock \
-    | grep -A5 inventory
-'
+docker compose run --rm spire-bootstrap sh -c \
+  '/opt/spire/bin/spire-server entry show \
+    -socketPath /tmp/spire-server/private/api.sock' | grep -A5 inventory
 ```
+
+**What this teaches:**
+- Registration entries are the **authorization policy** — they decide who gets which identity
+- The `unix:uid` selector tells SPIRE: "any process running as UID 10003 gets this SPIFFE ID"
+- In production, you'd use Kubernetes selectors (`k8s:pod-label:app=inventory`) instead
 
 ---
 
-## Lab 8: Explore SPIRE Server State
+## Lab 8: Explore SPIRE Server State with OpenSSL
 
-All `spire-server` CLI commands run via the bootstrap container (which has
-the binary and the server API socket mounted).
+**Concept:** SPIRE Server is the brain — it holds the CA keys, the trust
+bundle, registration entries, and attested agent records. Let's explore.
 
 ```bash
-# Trust bundle — the CA certificate for the trust domain
-docker compose run --rm spire-bootstrap sh -c '
-  /opt/spire/bin/spire-server bundle show \
+# 1. Show all registered workload entries (who can get which identity)
+docker compose run --rm spire-bootstrap sh -c \
+  '/opt/spire/bin/spire-server entry show \
     -socketPath /tmp/spire-server/private/api.sock'
 
-# All registered workload entries
-docker compose run --rm spire-bootstrap sh -c '
-  /opt/spire/bin/spire-server entry show \
+# 2. Show attested agents (nodes that have joined the trust domain)
+docker compose run --rm spire-bootstrap sh -c \
+  '/opt/spire/bin/spire-server agent list \
     -socketPath /tmp/spire-server/private/api.sock'
 
-# Attested nodes (the agent)
-docker compose run --rm spire-bootstrap sh -c '
-  /opt/spire/bin/spire-server agent list \
-    -socketPath /tmp/spire-server/private/api.sock'
+# 3. Export the trust bundle (CA certificate) as PEM
+docker compose run --rm spire-bootstrap sh -c \
+  '/opt/spire/bin/spire-server bundle show \
+    -socketPath /tmp/spire-server/private/api.sock \
+    -format spiffe' > /tmp/trust-bundle.json 2>/dev/null
 ```
+
+Now compare the frontend's SVID against the backend's — they're both issued by
+the same CA but have different SPIFFE IDs:
+
+```bash
+# Fetch the backend's SVID too
+docker compose exec backend node spiffe-workload-api/fetch-svid.js /tmp
+
+# Compare the two SVIDs side by side
+echo "=== Frontend ==="
+docker compose exec frontend \
+  openssl x509 -in /tmp/svid.0.pem -noout -subject -issuer -serial \
+    -ext subjectAltName
+
+echo ""
+echo "=== Backend ==="
+docker compose exec backend \
+  openssl x509 -in /tmp/svid.0.pem -noout -subject -issuer -serial \
+    -ext subjectAltName
+```
+
+**What you'll see:**
+- Same **Issuer** (SPIRE's CA) — both certs come from the same trust domain
+- Same **Subject** (`O=SPIRE`) — SPIRE issues all SVIDs
+- Different **Serial** numbers — each cert is unique
+- Different **SAN URIs** — `service/frontend` vs `service/backend`
 
 ---
 

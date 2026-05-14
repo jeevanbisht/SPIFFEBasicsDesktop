@@ -1,4 +1,5 @@
 FROM node:20-alpine
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY spiffe-workload-api/ spiffe-workload-api/
 COPY frontend/package.json .
