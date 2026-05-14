@@ -247,7 +247,9 @@ proof of identity.
 **Concept:** SPIRE automatically **rotates certificates** before they expire.
 Services never have to restart — they get fresh certs transparently.
 
-Fetch the SVID and note the serial number + expiry:
+> All commands below must be run from the `docker-compose/` directory.
+
+**Step 1** — Fetch the SVID and record the serial number + expiry:
 
 ```
 docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
@@ -257,17 +259,31 @@ docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
 docker compose exec frontend openssl x509 -in /tmp/svid.0.pem -noout -serial -dates
 ```
 
-Note the serial number and `notAfter` time.
+Write down the `serial=` value and the `notAfter` time.
 
-In a **second terminal**, watch the agent logs for rotation events:
+**Step 2** — Open a **second terminal**, `cd` into the `docker-compose/`
+directory, and watch the agent logs:
 
 ```
+cd docker-compose
 docker compose logs -f spire-agent
 ```
 
-After ~30 minutes (50% of the 1-hour TTL), SPIRE proactively rotates the cert.
-Re-run the fetch command — the serial number changes, but the SPIFFE ID stays
-the same:
+Look for lines containing `svid`, `rotate`, or `renew` — these indicate
+rotation events.
+
+**Step 3** — Wait or force a rotation:
+
+- **Option A — Wait:** SPIRE rotates at ~50% of the TTL (about 30 minutes
+  with a 1-hour TTL). Leave the logs running and come back later.
+- **Option B — Force it now:** Restart just the frontend so it re-fetches
+  its SVID immediately:
+
+```
+docker compose restart frontend
+```
+
+Wait ~15 seconds for it to become healthy, then fetch again:
 
 ```
 docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
@@ -277,8 +293,10 @@ docker compose exec frontend node spiffe-workload-api/fetch-svid.js /tmp
 docker compose exec frontend openssl x509 -in /tmp/svid.0.pem -noout -serial -dates
 ```
 
+Compare the serial number — it changed. The SPIFFE ID is the same.
+
 **Key takeaway:** No human intervention, no downtime, no secret distribution.
-SPIRE handles the entire lifecycle.
+SPIRE handles the entire certificate lifecycle.
 
 ---
 
