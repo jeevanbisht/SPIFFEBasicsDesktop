@@ -336,6 +336,17 @@ Copy the SPIFFE ID value, then register the entry — replace
 docker compose run --rm --entrypoint sh spire-bootstrap -c "/opt/spire/bin/spire-server entry create -socketPath /tmp/spire-server/private/api.sock -parentID <AGENT_SPIFFE_ID> -spiffeID spiffe://example.org/service/inventory -selector unix:uid:10003 -ttl 3600"
 ```
 
+You'll see:
+```
+Entry ID         : 3f5e0145-1502-4794-8790-dc6ff638f446
+SPIFFE ID        : spiffe://example.org/service/inventory
+Parent ID        : spiffe://example.org/spire/agent/join_token/6eeefc10-3d13-43f3-8532-2039d3cb4d57
+Revision         : 0
+X509-SVID TTL    : 3600
+JWT-SVID TTL     : default
+Selector         : unix:uid:10003
+```
+
 Verify it was created:
 
 ```
