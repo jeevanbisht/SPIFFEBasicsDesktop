@@ -318,9 +318,19 @@ Register a new "inventory" service. First, get the agent's SPIFFE ID:
 docker compose run --rm --entrypoint sh spire-bootstrap -c "/opt/spire/bin/spire-server agent list -socketPath /tmp/spire-server/private/api.sock"
 ```
 
-Copy the agent's SPIFFE ID from the output (looks like
-`spiffe://example.org/spire/agent/join_token/...`), then register the entry
-— replace `<AGENT_SPIFFE_ID>` with the value you copied:
+You'll see output like:
+```
+Found 1 attested agent(s)
+
+SPIFFE ID         : spiffe://example.org/spire/agent/join_token/6eeefc10-3d13-43f3-8532-2039d3cb4d57
+Attestation type  : join_token
+Expiration time   : 2026-05-14 05:22:39 +0000 UTC
+Serial number     : 215111834690286360396282484243455094291
+Can re-attest     : false
+```
+
+Copy the SPIFFE ID value, then register the entry — replace
+`<AGENT_SPIFFE_ID>` with the value you copied:
 
 ```
 docker compose run --rm --entrypoint sh spire-bootstrap -c "/opt/spire/bin/spire-server entry create -socketPath /tmp/spire-server/private/api.sock -parentID <AGENT_SPIFFE_ID> -spiffeID spiffe://example.org/service/inventory -selector unix:uid:10003 -ttl 3600"
