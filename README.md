@@ -168,33 +168,33 @@ SPIFFEBasicsDesktop/
 
 ```
 START
-  │
-  ▼
-📖 Read concepts (10 min)
-   docs/concepts.md
-  │
-  ├─── 🐳 Track A: Docker Compose ─────────────────────────────┐
-  │    docker-compose/README.md                                  │
-  │      Lab 1: Your first SVID                                 │
-  │      Lab 2: mTLS call between services                      │
-  │      Lab 3: Inspect the X.509 certificate                   │
-  │      Lab 4: Decode a JWT-SVID                               │
-  │      Lab 5: Break it — what mTLS enforcement looks like     │
-  │      Lab 6: Watch automatic SVID rotation                   │
-  │      Lab 7: Register a new service dynamically              │
-  │      Lab 8: Explore SPIRE Server state                      │
-  │                                                              │
-  └─── ☸️ Track B: kind/Kubernetes ──────────────────────────────┘
+  |
+  v
+Read concepts (10 min)
+  docs/concepts.md
+  |
+  +--- Track A: Docker Compose ---------------------+
+  |    docker-compose/README.md                     |
+  |      Lab 1: Your first SVID                     |
+  |      Lab 2: mTLS call between services          |
+  |      Lab 3: Inspect the X.509 certificate       |
+  |      Lab 4: Verify the trust chain              |
+  |      Lab 5: Zero trust - no SVID = no access    |
+  |      Lab 6: Watch automatic SVID rotation       |
+  |      Lab 7: Register a new service dynamically  |
+  |      Lab 8: Explore SPIRE Server state          |
+  |                                                 |
+  +--- Track B: kind/Kubernetes --------------------+
        kind/README.md
          Lab 1: Explore the cluster
          Lab 2: Node attestation (k8s_psat deep dive)
          Lab 3: Workload attestation
-         Lab 4: ClusterSPIFFEID — automatic registration
+         Lab 4: ClusterSPIFFEID - automatic registration
          Lab 5: [Advanced] Custom disk-based root CA
          Lab 6: [Advanced] Two-cluster SPIFFE federation
          Lab 7: [Advanced] Envoy transparent mTLS
-              │
-             DONE — Ready for cloud! ☁️
+              |
+             DONE - Ready for cloud!
              github.com/jeevanbisht/SPIFFEBasics
 ```
 
