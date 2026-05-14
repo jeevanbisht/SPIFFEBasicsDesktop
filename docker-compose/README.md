@@ -140,8 +140,8 @@ CA bundle  : /tmp/bundle.0.pem
 
 ```bash
 # Step 2 — Find the SPIFFE ID in the certificate's SAN field
-docker compose exec frontend \
-  openssl x509 -in /tmp/svid.0.pem -text -noout | grep -A1 "Subject Alternative Name"
+docker compose exec frontend sh -c \
+  'openssl x509 -in /tmp/svid.0.pem -text -noout | grep -A1 "Subject Alternative Name"'
 ```
 
 Expected:
@@ -152,8 +152,8 @@ X509v3 Subject Alternative Name:
 
 ```bash
 # Step 3 — Check the validity window (1-hour TTL)
-docker compose exec frontend \
-  openssl x509 -in /tmp/svid.0.pem -text -noout | grep -E "Not Before|Not After"
+docker compose exec frontend sh -c \
+  'openssl x509 -in /tmp/svid.0.pem -text -noout | grep -E "Not Before|Not After"'
 ```
 
 ```bash
@@ -188,8 +188,8 @@ Expected:
 
 ```bash
 # Inspect the CA certificate itself
-docker compose exec frontend \
-  openssl x509 -in /tmp/bundle.0.pem -text -noout | grep -E "Subject:|Issuer:|CA:"
+docker compose exec frontend sh -c \
+  'openssl x509 -in /tmp/bundle.0.pem -text -noout | grep -E "Subject:|Issuer:|CA:"'
 ```
 
 **What this proves:**
@@ -252,7 +252,10 @@ Note the serial number and `notAfter` time.
 
 ```bash
 # In a second terminal, watch the agent logs for rotation events:
+# On Linux/Mac:
 docker compose logs -f spire-agent 2>&1 | grep -i "svid\|rotat\|renew"
+# On Windows (PowerShell):
+docker compose logs -f spire-agent 2>&1 | Select-String -Pattern "svid|rotat|renew"
 ```
 
 After ~30 minutes (50% of the 1-hour TTL), SPIRE proactively rotates the cert.
@@ -299,7 +302,7 @@ docker compose run --rm spire-bootstrap sh -c '
 # Verify it was created
 docker compose run --rm spire-bootstrap sh -c \
   '/opt/spire/bin/spire-server entry show \
-    -socketPath /tmp/spire-server/private/api.sock' | grep -A5 inventory
+    -socketPath /tmp/spire-server/private/api.sock | grep -A5 inventory'
 ```
 
 **What this teaches:**
@@ -402,7 +405,10 @@ docker compose up -d --build
 ### Frontend returns 502 (can't reach backend)
 Check that backend is healthy and has its SVID:
 ```bash
+# On Linux/Mac:
 docker compose logs backend | grep -E "SVID|mTLS|error"
+# On Windows (PowerShell):
+docker compose logs backend 2>&1 | Select-String -Pattern "SVID|mTLS|error"
 ```
 
 ### "SSL routines: no certificate" when calling backend directly
