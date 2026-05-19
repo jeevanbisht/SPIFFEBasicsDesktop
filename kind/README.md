@@ -113,139 +113,126 @@ kubectl -n spire get pods
 
 ## Labs
 
-> **Windows users — two things to know before starting:**
-> 1. Replace `\` line-continuation with a backtick `` ` `` in PowerShell.
-> 2. Replace `grep` with `Select-String` in PowerShell (examples shown in each lab).
-> All `kubectl` commands work identically in PowerShell, Git Bash, and WSL2.
+> 💡 **Every command below is on a single line** — click the copy button on any code block to grab it exactly.  
+> **Windows PowerShell users:** `kubectl` commands work as-is. Where bash and PowerShell differ, both variants are shown.
 
 ---
 
 ### Lab 1: Explore the Cluster
 
-All commands below work as-is on Windows PowerShell, Git Bash, and WSL2.
+> Works as-is on macOS, Linux, Windows PowerShell, Git Bash, and WSL2.
 
+See all SPIRE components (pods, services, configmaps, volumes):
 ```bash
-# See SPIRE components
 kubectl -n spire get pods,svc,configmap,pvc
+```
 
-# SPIRE Server logs
+Tail the SPIRE Server logs:
+```bash
 kubectl -n spire logs spire-server-0
+```
 
-# SPIRE Agent logs (pick any agent pod)
+Tail the SPIRE Agent logs across all nodes:
+```bash
 kubectl -n spire logs -l app=spire-agent --tail=50
 ```
 
+---
+
 ### Lab 2: Node Attestation via k8s_psat
 
-On Kubernetes (unlike Docker Compose), agents use **Projected Service Account Tokens** to prove which node they're on:
+On Kubernetes, agents use **Projected Service Account Tokens** to prove which node they're on.
 
-**macOS / Linux / Git Bash / WSL2:**
+List attested nodes:
+
 ```bash
-# See the attested nodes
-kubectl -n spire exec -it spire-server-0 -- \
-  /opt/spire/bin/spire-server agent list
+kubectl -n spire exec -it spire-server-0 -- /opt/spire/bin/spire-server agent list
+```
 
-# The agent's SPIFFE ID encodes the cluster and node:
-# spiffe://example.org/spire/agent/k8s_psat/spiffe-lab/<node-uid>
+> Each agent's SPIFFE ID encodes the cluster and node UID:  
+> `spiffe://example.org/spire/agent/k8s_psat/spiffe-lab/<node-uid>`
 
-# Inspect the projected token the agent uses
-kubectl -n spire get pod -l app=spire-agent -o yaml | \
-  grep -A5 "projected"
+Inspect the projected token volume the agent uses — **bash / Git Bash / WSL2:**
+```bash
+kubectl -n spire get pod -l app=spire-agent -o yaml | grep -A5 "projected"
 ```
 
 **Windows PowerShell:**
 ```powershell
-# See the attested nodes (backtick ` for line continuation)
-kubectl -n spire exec -it spire-server-0 -- `
-  /opt/spire/bin/spire-server agent list
-
-# Inspect the projected token the agent uses (Select-String replaces grep)
-kubectl -n spire get pod -l app=spire-agent -o yaml | `
-  Select-String -Pattern "projected" -Context 0,5
+kubectl -n spire get pod -l app=spire-agent -o yaml | Select-String -Pattern "projected" -Context 0,5
 ```
+
+---
 
 ### Lab 3: Workload Attestation
 
-**macOS / Linux / Git Bash / WSL2:**
+**Step 1 —** Deploy a test workload:
 ```bash
-# Deploy a test workload
 kubectl apply -f spire/k8s/test-workload.yaml
+```
 
-# Exec in and fetch an SVID
-kubectl exec -it test-workload -- \
-  /opt/spire/bin/spire-agent api fetch x509 \
-    -socketPath /run/spire/sockets/agent.sock
-
-# See registration entries
-kubectl -n spire exec -it spire-server-0 -- \
-  /opt/spire/bin/spire-server entry show
+**Step 2 —** Exec in and fetch an X.509 SVID — **bash / Git Bash / WSL2:**
+```bash
+kubectl exec -it test-workload -- /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock
 ```
 
 **Windows PowerShell:**
 ```powershell
-# Deploy a test workload
-kubectl apply -f spire/k8s/test-workload.yaml
-
-# Exec in and fetch an SVID
-kubectl exec -it test-workload -- `
-  /opt/spire/bin/spire-agent api fetch x509 `
-    -socketPath /run/spire/sockets/agent.sock
-
-# See registration entries
-kubectl -n spire exec -it spire-server-0 -- `
-  /opt/spire/bin/spire-server entry show
+kubectl exec -it test-workload -- /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock
 ```
+
+> Same command on both platforms — no line continuation needed!
+
+**Step 3 —** See all registration entries on the server:
+```bash
+kubectl -n spire exec -it spire-server-0 -- /opt/spire/bin/spire-server entry show
+```
+
+---
 
 ### Lab 4: ClusterSPIFFEID — Automatic Registration
 
-Instead of manually registering every workload, use the Controller Manager CRD:
+Instead of manually registering every workload, use the Controller Manager CRD.
 
-**macOS / Linux / Git Bash / WSL2:**
+**Step 1 —** Apply the ClusterSPIFFEID policy:
 ```bash
-# Apply a ClusterSPIFFEID that auto-registers all pods
 kubectl apply -f spire/k8s/cluster-spiffe-id.yaml
+```
 
-# Deploy a new pod — it gets a SPIFFE ID automatically!
-kubectl run auto-workload --image=ghcr.io/spiffe/spire-agent:1.9.6 \
-  --command -- sleep 3600
-
-kubectl exec -it auto-workload -- \
-  /opt/spire/bin/spire-agent api fetch x509 \
-    -socketPath /run/spire/sockets/agent.sock
-# SPIFFE ID: spiffe://example.org/ns/default/sa/default
-# (Generated automatically by Controller Manager!)
+**Step 2 —** Deploy a new pod — it gets a SPIFFE ID automatically — **bash / Git Bash / WSL2:**
+```bash
+kubectl run auto-workload --image=ghcr.io/spiffe/spire-agent:1.9.6 --command -- sleep 3600
 ```
 
 **Windows PowerShell:**
 ```powershell
-# Apply a ClusterSPIFFEID that auto-registers all pods
-kubectl apply -f spire/k8s/cluster-spiffe-id.yaml
-
-# Deploy a new pod — it gets a SPIFFE ID automatically!
-kubectl run auto-workload --image=ghcr.io/spiffe/spire-agent:1.9.6 `
-  --command -- sleep 3600
-
-kubectl exec -it auto-workload -- `
-  /opt/spire/bin/spire-agent api fetch x509 `
-    -socketPath /run/spire/sockets/agent.sock
-# SPIFFE ID: spiffe://example.org/ns/default/sa/default
-# (Generated automatically by Controller Manager!)
+kubectl run auto-workload --image=ghcr.io/spiffe/spire-agent:1.9.6 --command -- sleep 3600
 ```
+
+**Step 3 —** Fetch the auto-assigned SVID:
+```bash
+kubectl exec -it auto-workload -- /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock
+```
+
+> Expected SPIFFE ID: `spiffe://example.org/ns/default/sa/default` — generated automatically!
 
 ---
 
 ## Advanced Labs
 
-> **Windows users:** Labs 5 and 6 use shell scripts (`.sh`). Run them via **Git Bash** or **WSL2**.
-> All `kubectl` commands work in PowerShell with `` ` `` instead of `\`.
+> 💡 Labs 5 and 6 use shell scripts (`.sh`). Run them via **Git Bash** or **WSL2** on Windows.  
+> All `kubectl` commands work in PowerShell as-is.
+
+---
 
 ### Lab 5: Custom Disk-Based Root CA
 
-Replace the self-signed CA with a custom root CA (simulates Azure Key Vault CA):
+Replace the self-signed CA with a custom root CA (simulates Azure Key Vault CA).
 
 ```bash
-# macOS / Linux / Git Bash / WSL2
 cd advanced/disk-ca/
+```
+```bash
 ./setup-custom-ca.sh
 ```
 
@@ -256,58 +243,60 @@ Root CA (generated locally with openssl)
     └── SVIDs for workloads
 ```
 
+---
+
 ### Lab 6: Two-Cluster Federation
 
-Run two separate kind clusters and federate them:
+Run two separate kind clusters and federate them.
 
-**macOS / Linux / Git Bash / WSL2:**
+**Step 1 —** Run the federation setup:
 ```bash
 cd advanced/two-cluster/
+```
+```bash
 ./setup-federation.sh
-
-# After setup, workloads in cluster-a can verify SVIDs from cluster-b
-kubectl --context kind-cluster-a exec -it test-workload -- \
-  /opt/spire/bin/spire-agent api fetch x509 \
-    -socketPath /run/spire/sockets/agent.sock 2>&1 | grep "CA #"
-# CA #1: cluster-a.io root
-# CA #2: cluster-b.io root  ← federated bundle!
 ```
 
-**Windows PowerShell** (after running `./setup-federation.sh` in Git Bash / WSL2):
+**Step 2 —** Verify cluster-a workloads see both trust roots — **bash / Git Bash / WSL2:**
+```bash
+kubectl --context kind-cluster-a exec -it test-workload -- /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock 2>&1 | grep "CA #"
+```
+
+**Windows PowerShell:**
 ```powershell
-kubectl --context kind-cluster-a exec -it test-workload -- `
-  /opt/spire/bin/spire-agent api fetch x509 `
-    -socketPath /run/spire/sockets/agent.sock 2>&1 | Select-String "CA #"
-# CA #1: cluster-a.io root
-# CA #2: cluster-b.io root  ← federated bundle!
+kubectl --context kind-cluster-a exec -it test-workload -- /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock 2>&1 | Select-String "CA #"
 ```
+
+> Expected output:
+> ```
+> CA #1: cluster-a.io root
+> CA #2: cluster-b.io root  ← federated bundle!
+> ```
+
+---
 
 ### Lab 7: Envoy Transparent mTLS
 
-Deploy Envoy as a sidecar — your app code never touches a certificate:
+Deploy Envoy as a sidecar — your app code never touches a certificate.
 
-**macOS / Linux / Git Bash / WSL2:**
+**Step 1 —** Deploy Envoy — **bash / Git Bash / WSL2:**
 ```bash
 cd advanced/envoy/
-kubectl apply -f k8s/
-
-# The app speaks plain HTTP internally; Envoy handles mTLS
-kubectl -n demo exec -it deployment/frontend-envoy -c app -- \
-  curl http://backend-envoy.demo.svc.cluster.local:8080/orders
-# ← Plain HTTP call from the app perspective
-# ← But Envoy upgrades to mTLS between pods!
 ```
 
 **Windows PowerShell:**
 ```powershell
 cd advanced\envoy\
-kubectl apply -f k8s/
+```
 
-# The app speaks plain HTTP internally; Envoy handles mTLS
-kubectl -n demo exec -it deployment/frontend-envoy -c app -- `
-  curl http://backend-envoy.demo.svc.cluster.local:8080/orders
-# ← Plain HTTP call from the app perspective
-# ← But Envoy upgrades to mTLS between pods!
+**Step 2 —** Apply manifests (same on all platforms):
+```bash
+kubectl apply -f k8s/
+```
+
+**Step 3 —** Make a plain HTTP call — Envoy transparently upgrades it to mTLS:
+```bash
+kubectl -n demo exec -it deployment/frontend-envoy -c app -- curl http://backend-envoy.demo.svc.cluster.local:8080/orders
 ```
 
 ---
