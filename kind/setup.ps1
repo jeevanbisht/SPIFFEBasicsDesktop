@@ -10,6 +10,10 @@ function log  { param($msg) Write-Host "[setup] $msg" -ForegroundColor Cyan }
 function ok   { param($msg) Write-Host "[ok]    $msg" -ForegroundColor Green }
 function die  { param($msg) Write-Host "[error] $msg" -ForegroundColor Red; exit 1 }
 
+# ─── Refresh PATH (picks up winget/choco/scoop installs without shell restart) ─
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" +
+            [System.Environment]::GetEnvironmentVariable("PATH","User")
+
 # ─── Prerequisite checks ────────────────────────────────────────────────────
 foreach ($tool in @("kind", "kubectl", "docker")) {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
