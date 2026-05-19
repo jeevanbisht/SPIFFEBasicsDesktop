@@ -105,7 +105,11 @@ curl http://localhost:3000/demo
 # ← Served over mTLS using SPIFFE SVIDs, zero passwords!
 
 # Track B — kind/Kubernetes
-cd ../kind && ./setup.sh
+cd ../kind && ./setup.sh          # macOS/Linux (bash)
+# Windows PowerShell:
+cd ..\kind; .\setup.ps1
+# Windows Git Bash / WSL2:
+# cd ../kind && ./setup.sh
 ```
 
 **Only requirement: [Docker Desktop](https://www.docker.com/products/docker-desktop/)**
@@ -118,10 +122,10 @@ cd ../kind && ./setup.sh
 |-------------|---------|---------|-------|
 | Docker Desktop | 4.x+ | [docker.com](https://www.docker.com/products/docker-desktop/) | `docker --version` |
 | docker compose | v2 (built-in) | Included in Docker Desktop | `docker compose version` |
-| **Track B only:** kind | 0.20+ | [kind.sigs.k8s.io](https://kind.sigs.k8s.io/docs/user/quick-start/) | `kind --version` |
-| **Track B only:** kubectl | 1.28+ | [kubectl.io](https://kubernetes.io/docs/tasks/tools/) | `kubectl version --client` |
+| **Track B only:** kind | 0.20+ | [kind.sigs.k8s.io](https://kind.sigs.k8s.io/docs/user/quick-start/) · Windows: `winget install Kubernetes.kind` | `kind --version` |
+| **Track B only:** kubectl | 1.28+ | [kubernetes.io/docs/tasks/tools](https://kubernetes.io/docs/tasks/tools/) · Windows: `winget install Kubernetes.kubectl` | `kubectl version --client` |
 
-> 💡 **Windows users:** Use Git Bash or WSL2 for shell scripts. PowerShell works for Docker commands.
+> 💡 **Windows users:** Use PowerShell (`.\setup.ps1`) or Git Bash / WSL2 (`./setup.sh`) for Track B scripts.
 
 ```bash
 # Auto-check all prerequisites
@@ -152,7 +156,10 @@ SPIFFEBasicsDesktop/
 │   │   └── backend/              ← Node.js mTLS server (verifies SPIFFE ID)
 │   └── README.md                 ← 8 hands-on labs
 └── kind/                         ← ☸️ Track B
-    ├── setup.sh                  ← Creates cluster + deploys SPIRE
+    ├── setup.sh                  ← Creates cluster + deploys SPIRE (macOS/Linux/WSL2)
+    ├── setup.ps1                 ← Creates cluster + deploys SPIRE (Windows PowerShell)
+    ├── teardown.sh               ← Deletes kind clusters (macOS/Linux/WSL2)
+    ├── teardown.ps1              ← Deletes kind clusters (Windows PowerShell)
     ├── kind-config.yaml          ← 3-node cluster config
     ├── spire/k8s/                ← All Kubernetes manifests
     ├── advanced/
