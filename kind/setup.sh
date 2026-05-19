@@ -36,6 +36,7 @@ kubectl apply -f spire/k8s/namespace.yaml
 kubectl apply -f spire/k8s/server-service-account.yaml
 kubectl apply -f spire/k8s/server-cluster-role.yaml
 kubectl apply -f spire/k8s/server-configmap.yaml
+kubectl apply -f spire/k8s/server-bundle-configmap.yaml   # must exist before server starts
 kubectl apply -f spire/k8s/server-statefulset.yaml
 kubectl apply -f spire/k8s/server-service.yaml
 kubectl -n "${SPIRE_NS}" rollout status statefulset/spire-server --timeout=120s
@@ -61,14 +62,18 @@ if [ -d "demo" ]; then
 fi
 
 # ─── Health check ───────────────────────────────────────────────────────────
-sleep 5
+log "Waiting for SPIRE components to fully initialize..."
+sleep 15
 log "Checking SPIRE health..."
-kubectl -n "${SPIRE_NS}" exec -it spire-server-0 -- \
+kubectl -n "${SPIRE_NS}" exec spire-server-0 -c spire-server -- \
   /opt/spire/bin/spire-server healthcheck && ok "Server: healthy"
 
-AGENT_POD=$(kubectl -n "${SPIRE_NS}" get pod -l app=spire-agent -o name | head -1)
-kubectl -n "${SPIRE_NS}" exec -it "${AGENT_POD}" -- \
-  /opt/spire/bin/spire-agent healthcheck && ok "Agent: healthy"
+NOT_READY=$(kubectl -n "${SPIRE_NS}" get pods -l app=spire-agent \
+  -o jsonpath='{.items[?(@.status.containerStatuses[0].ready==false)].metadata.name}')
+if [ -n "${NOT_READY}" ]; then
+  die "Some agent pods are not ready: ${NOT_READY}"
+fi
+ok "Agent(s): healthy (all pods Ready)"
 
 log "══════════════════════════════════════════════════"
 ok "Setup complete!"
