@@ -24,9 +24,9 @@ $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     die "Docker Desktop not found. Install it first: https://www.docker.com/products/docker-desktop/"
 }
-docker info 2>&1 | Out-Null
+$null = docker info 2>&1   # capture all output; don't let PowerShell surface it as an error
 if ($LASTEXITCODE -ne 0) {
-    die "Docker Desktop is installed but not running. Start Docker Desktop and wait for the whale icon in the system tray, then re-run this script."
+    die "Docker Desktop is not running.`n`n  Please start Docker Desktop and wait for the whale icon`n  in the system tray, then re-run this script."
 }
 
 if (-not (Get-Command kind -ErrorAction SilentlyContinue)) {
