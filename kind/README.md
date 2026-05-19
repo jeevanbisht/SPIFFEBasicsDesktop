@@ -7,18 +7,25 @@
 
 ## Prerequisites
 
-- Docker Desktop running
-- `kind` 0.20+ installed
-- `kubectl` 1.28+ installed
+Install in this order — each step depends on the one before it:
+
+| # | Dependency | Why |
+|---|-----------|-----|
+| 1 | **Docker Desktop** (running) | kind runs cluster nodes as Docker containers |
+| 2 | **kind** | creates and manages the local Kubernetes cluster |
+| 3 | **kubectl** | sends commands to the cluster |
 
 ### Installing on macOS / Linux
 
 ```bash
-# kind
+# 1. Docker Desktop — https://www.docker.com/products/docker-desktop/
+#    (start it before running setup.sh)
+
+# 2. kind
 brew install kind          # macOS
 # or: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
 
-# kubectl
+# 3. kubectl
 brew install kubectl       # macOS
 # or: https://kubernetes.io/docs/tasks/tools/
 ```
@@ -26,25 +33,31 @@ brew install kubectl       # macOS
 ### Installing on Windows
 
 ```powershell
-# kind — any of these options work:
+# 1. Docker Desktop — download and install first, then START it:
+#    https://www.docker.com/products/docker-desktop/
+#    Wait for the whale icon in the system tray before continuing.
+
+# 2. kind
 winget install Kubernetes.kind          # Windows Package Manager (recommended)
 choco install kind                      # Chocolatey
 scoop install kind                      # Scoop
-# or download the binary: https://github.com/kubernetes-sigs/kind/releases
+# or download: https://github.com/kubernetes-sigs/kind/releases
 
-# kubectl — any of these options work:
+# 3. kubectl
 winget install Kubernetes.kubectl       # Windows Package Manager (recommended)
 choco install kubernetes-cli            # Chocolatey
 scoop install kubectl                   # Scoop
 # or download: https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
 ```
 
-> 💡 **Verify installs:** `kind --version` and `kubectl version --client`
+> 💡 **After installing kind/kubectl on Windows**, open a new terminal so the updated `PATH` takes effect — or `setup.ps1` will do it for you automatically.
 
-```bash
-# Auto-check all prerequisites (Git Bash / WSL2)
-./check-prereqs.sh
-```
+> 💡 **Verify all three are ready:**
+> ```powershell
+> docker info          # must show server info (not an error)
+> kind --version
+> kubectl version --client
+> ```
 
 ---
 

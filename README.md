@@ -126,6 +126,7 @@ cd ..\kind; .\setup.ps1
 | **Track B only:** kubectl | 1.28+ | [kubernetes.io/docs/tasks/tools](https://kubernetes.io/docs/tasks/tools/) · Windows: `winget install Kubernetes.kubectl` | `kubectl version --client` |
 
 > 💡 **Windows users:** Use PowerShell (`.\setup.ps1`) or Git Bash / WSL2 (`./setup.sh`) for Track B scripts.
+> **Install order matters:** Docker Desktop first (and start it), then kind, then kubectl.
 
 ```bash
 # Auto-check all prerequisites

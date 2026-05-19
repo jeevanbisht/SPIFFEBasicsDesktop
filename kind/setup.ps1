@@ -14,14 +14,27 @@ function die  { param($msg) Write-Host "[error] $msg" -ForegroundColor Red; exit
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" +
             [System.Environment]::GetEnvironmentVariable("PATH","User")
 
-# ─── Prerequisite checks ────────────────────────────────────────────────────
-foreach ($tool in @("kind", "kubectl", "docker")) {
-    if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
-        die "$tool not found. See README.md for Windows install instructions."
-    }
+# ─── Prerequisite checks (in dependency order) ──────────────────────────────
+#
+#  1. Docker Desktop installed  — kind uses Docker to run cluster nodes
+#  2. Docker Desktop running    — daemon must be up before `kind create cluster`
+#  3. kind installed            — creates/manages the local k8s cluster
+#  4. kubectl installed         — talks to the cluster once it exists
+
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    die "Docker Desktop not found. Install it first: https://www.docker.com/products/docker-desktop/"
 }
 docker info 2>&1 | Out-Null
-if ($LASTEXITCODE -ne 0) { die "Docker is not running. Start Docker Desktop first." }
+if ($LASTEXITCODE -ne 0) {
+    die "Docker Desktop is installed but not running. Start Docker Desktop and wait for the whale icon in the system tray, then re-run this script."
+}
+
+if (-not (Get-Command kind -ErrorAction SilentlyContinue)) {
+    die "kind not found. Install it with: winget install Kubernetes.kind`nSee README.md for more options."
+}
+if (-not (Get-Command kubectl -ErrorAction SilentlyContinue)) {
+    die "kubectl not found. Install it with: winget install Kubernetes.kubectl`nSee README.md for more options."
+}
 
 log "╔══════════════════════════════════════════════════╗"
 log "║   SPIFFE Standalone — kind Cluster Setup         ║"
