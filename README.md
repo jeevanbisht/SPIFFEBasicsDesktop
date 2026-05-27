@@ -19,6 +19,8 @@
 
 **Total: 15 hands-on labs. No cloud. No sign-ups. No cost.**
 
+> 🗺️ **Visual overview:** [Key Use Cases → Lab Mapping](./docs/spiffe-use-cases.html) — see which labs cover each SPIFFE use case.
+
 After completing this tutorial, graduate to the cloud: **[SPIFFEBasics → Azure AKS deployment](https://github.com/jeevanbisht/SPIFFEBasics)**
 
 ---
@@ -145,6 +147,7 @@ SPIFFEBasicsDesktop/
 ├── docs/
 │   ├── concepts.md               ← Core SPIFFE/SPIRE concepts (read first!)
 │   ├── glossary.md               ← Full term reference (30+ entries)
+│   ├── spiffe-use-cases.html     ← 🗺️ Visual: Key use cases → lab mapping
 │   └── architecture/
 │       └── overview.md           ← Deep-dive: attestation flows, cert chains
 ├── labs/

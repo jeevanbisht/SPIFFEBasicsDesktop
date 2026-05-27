@@ -3,6 +3,8 @@
 This document explains every concept you need before running the labs.
 Read this once, then keep it open as a reference.
 
+> 🗺️ **Visual learner?** See the [Key Use Cases → Lab Mapping](./spiffe-use-cases.html) for an interactive diagram of what each lab covers.
+
 ---
 
 ## The One-Sentence Summary

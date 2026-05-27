@@ -2,6 +2,8 @@
 
 > All labs run on your laptop. No cloud account needed.
 
+> 🗺️ **Not sure where to start?** See the [Key Use Cases → Lab Mapping](../docs/spiffe-use-cases.html) to find which labs cover the scenario you care about.
+
 ## Quick Navigation
 
 ### 🐳 Track A — Docker Compose Labs
