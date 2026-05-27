@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SPIFFE Key Use Cases → Tutorial Mapping</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+    const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  min-height: 100vh;
+  padding: 32px 24px 64px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--cp-text);
+}
+header p {
+  margin-top: 8px;
+  color: var(--cp-text-muted);
+  font-size: 1rem;
+}
+header .subtitle-badge {
+  display: inline-block;
+  margin-top: 12px;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  border: 1px solid var(--cp-accent);
+  border-radius: 99px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: var(--cp-shadow);
+}
+
+.card-diagram {
+  padding: 28px 24px 20px;
+  background: var(--cp-surface-soft);
+  border-bottom: 1px solid var(--cp-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.card-body {
+  padding: 20px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.use-case-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cp-text);
+  line-height: 1.4;
+}
+
+.use-case-desc {
+  font-size: 0.85rem;
+  color: var(--cp-text-muted);
+  line-height: 1.5;
+}
+
+.labs-section {
+  margin-top: 4px;
+}
+.labs-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--cp-text-soft);
+  margin-bottom: 8px;
+}
+.labs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lab-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.lab-chip.track-a {
+  background: rgba(0, 120, 212, 0.1);
+  color: var(--cp-link);
+  border-color: rgba(0, 120, 212, 0.25);
+}
+.lab-chip.track-b {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--cp-success);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+.lab-chip.partial {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--cp-warning);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.coverage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  align-self: flex-start;
+}
+.coverage-badge.full {
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--cp-success);
+}
+.coverage-badge.partial {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--cp-warning);
+}
+.coverage-badge.none {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--cp-danger);
+}
+
+/* SVG diagram styles */
+.node-box {
+  fill: var(--cp-surface);
+  stroke: var(--cp-border-strong);
+  stroke-width: 1.5;
+  rx: 6;
+}
+.node-spire {
+  fill: var(--cp-accent-soft);
+  stroke: var(--cp-accent);
+  stroke-width: 1.5;
+}
+.lock-circle {
+  fill: #3b1f6e;
+}
+.conn-line {
+  stroke: #6c3fc5;
+  stroke-width: 2;
+  fill: none;
+}
+.conn-line-green {
+  stroke: #16a34a;
+  stroke-width: 2;
+  fill: none;
+}
+.label-text {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 9px;
+  fill: var(--cp-text-muted);
+  text-anchor: middle;
+}
+.svid-text {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 7.5px;
+  fill: var(--cp-accent);
+  font-weight: 600;
+}
+
+.legend {
+  max-width: 1200px;
+  margin: 36px auto 0;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 10px;
+}
+.legend-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cp-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--cp-text-muted);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SPIFFE Key Use Cases</h1>
+  <p>How each use case maps to the hands-on tutorial labs</p>
+  <span class="subtitle-badge">github.com/jeevanbisht/SPIFFEBasicsDesktop</span>
+</header>
+
+<div class="grid">
+
+  <!-- Use Case 1: Secure Microservices -->
+  <div class="card">
+    <div class="card-diagram">
+      <svg width="260" height="90" viewBox="0 0 260 90">
+        <!-- Service A -->
+        <rect x="10" y="30" width="48" height="30" rx="6" class="node-box"/>
+        <text x="34" y="49" class="label-text">Service A</text>
+        <!-- SPIRE -->
+        <rect x="96" y="20" width="68" height="50" rx="6" class="node-spire"/>
+        <text x="130" y="42" class="label-text" style="fill:var(--cp-accent);font-weight:700;">SPIRE</text>
+        <text x="130" y="55" class="label-text" style="fill:var(--cp-accent);">Agent</text>
+        <!-- Service B -->
+        <rect x="202" y="30" width="48" height="30" rx="6" class="node-box"/>
+        <text x="226" y="49" class="label-text">Service B</text>
+        <!-- Lines -->
+        <line x1="58" y1="45" x2="96" y2="45" class="conn-line"/>
+        <line x1="164" y1="45" x2="202" y2="45" class="conn-line"/>
+        <!-- Lock icons -->
+        <circle cx="77" cy="45" r="8" class="lock-circle"/>
+        <text x="77" y="48.5" style="font-size:9px;text-anchor:middle;fill:#fff;">🔒</text>
+        <circle cx="183" cy="45" r="8" class="lock-circle"/>
+        <text x="183" y="48.5" style="font-size:9px;text-anchor:middle;fill:#fff;">🔒</text>
+        <!-- mTLS label -->
+        <text x="130" y="83" class="label-text" style="font-weight:600;fill:var(--cp-text);">mTLS · X.509 · JWT</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="use-case-title">🔒 Secure Microservices Communication</div>
+        <span class="coverage-badge full">✓ Full</span>
+      </div>
+      <div class="use-case-desc">Automatically secure service-to-service traffic using Envoy, X.509 PKI, or JWT — no passwords, no API keys.</div>
+      <div class="labs-section">
+        <div class="labs-label">Covered By</div>
+        <div class="labs-list">
+          <span class="lab-chip track-a">🐳 Track A · Lab 2 — mTLS</span>
+          <span class="lab-chip track-a">🐳 Track A · Lab 3 — X.509 Inspect</span>
+          <span class="lab-chip track-a">🐳 Track A · Lab 4 — Trust Chain</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 7 — Envoy mTLS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use Case 2: Database Auth -->
+  <div class="card">
+    <div class="card-diagram">
+      <svg width="260" height="90" viewBox="0 0 260 90">
+        <!-- DB -->
+        <ellipse cx="40" cy="35" rx="26" ry="10" fill="var(--cp-surface-soft)" stroke="var(--cp-border-strong)" stroke-width="1.5"/>
+        <rect x="14" y="35" width="52" height="22" fill="var(--cp-surface-soft)" stroke="var(--cp-border-strong)" stroke-width="1.5"/>
+        <ellipse cx="40" cy="57" rx="26" ry="10" fill="var(--cp-surface-soft)" stroke="var(--cp-border-strong)" stroke-width="1.5"/>
+        <text x="40" y="48" class="label-text">Database</text>
+        <!-- Lock -->
+        <circle cx="88" cy="45" r="9" class="lock-circle"/>
+        <text x="88" y="48.5" style="font-size:10px;text-anchor:middle;fill:#fff;">🔒</text>
+        <!-- SPIRE box -->
+        <rect x="106" y="28" width="56" height="34" rx="6" class="node-spire"/>
+        <text x="134" y="48" class="label-text" style="fill:var(--cp-accent);font-weight:700;">SVID</text>
+        <!-- Lock -->
+        <circle cx="172" cy="45" r="9" class="lock-circle"/>
+        <text x="172" y="48.5" style="font-size:10px;text-anchor:middle;fill:#fff;">🔒</text>
+        <!-- App/Platform -->
+        <rect x="188" y="28" width="60" height="34" rx="6" fill="rgba(0,120,212,0.08)" stroke="rgba(0,120,212,0.4)" stroke-width="1.5"/>
+        <text x="218" y="48" class="label-text" style="fill:var(--cp-link);">Platform</text>
+        <!-- Lines -->
+        <line x1="66" y1="45" x2="79" y2="45" class="conn-line"/>
+        <line x1="97" y1="45" x2="106" y2="45" class="conn-line"/>
+        <line x1="162" y1="45" x2="172" y2="45" class="conn-line"/>
+        <line x1="181" y1="45" x2="188" y2="45" class="conn-line"/>
+        <!-- No Password badge -->
+        <text x="130" y="82" class="label-text" style="font-weight:600;fill:var(--cp-text);">No passwords · No API keys</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="use-case-title">🗄️ Authenticate to Databases & Platforms</div>
+        <span class="coverage-badge partial">⚠ Partial</span>
+      </div>
+      <div class="use-case-desc">Authenticate securely to databases or platforms without passwords or API keys — identity only via SVID.</div>
+      <div class="labs-section">
+        <div class="labs-label">Covered By</div>
+        <div class="labs-list">
+          <span class="lab-chip track-a">🐳 Track A · Lab 1 — SVID Identity</span>
+          <span class="lab-chip track-a">🐳 Track A · Lab 5 — No SVID = Rejected</span>
+          <span class="lab-chip track-a">🐳 Track A · Lab 7 — Register Service</span>
+          <span class="lab-chip partial">⚠ No dedicated DB lab</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use Case 3: Service Mesh / Federation -->
+  <div class="card">
+    <div class="card-diagram">
+      <svg width="260" height="90" viewBox="0 0 260 90">
+        <!-- Left hub -->
+        <circle cx="72" cy="45" r="18" fill="var(--cp-accent-soft)" stroke="var(--cp-accent)" stroke-width="1.5"/>
+        <text x="72" y="42" class="label-text" style="fill:var(--cp-accent);font-weight:700;">Org A</text>
+        <text x="72" y="53" class="label-text" style="fill:var(--cp-accent);">Trust</text>
+        <!-- Left spokes -->
+        <line x1="54" y1="35" x2="30" y2="20" stroke="var(--cp-border-strong)" stroke-width="1.2"/>
+        <rect x="16" y="12" width="28" height="16" rx="4" class="node-box"/>
+        <line x1="54" y1="45" x2="24" y2="45" stroke="var(--cp-border-strong)" stroke-width="1.2"/>
+        <rect x="8" y="37" width="28" height="16" rx="4" class="node-box"/>
+        <line x1="54" y1="55" x2="30" y2="68" stroke="var(--cp-border-strong)" stroke-width="1.2"/>
+        <rect x="16" y="62" width="28" height="16" rx="4" class="node-box"/>
+        <!-- Bridge lock -->
+        <circle cx="130" cy="45" r="10" class="lock-circle"/>
+        <text x="130" y="48.5" style="font-size:11px;text-anchor:middle;fill:#fff;">🔒</text>
+        <line x1="90" y1="45" x2="120" y2="45" class="conn-line" stroke-dasharray="4,2"/>
+        <line x1="140" y1="45" x2="170" y2="45" class="conn-line" stroke-dasharray="4,2"/>
+        <!-- Right hub -->
+        <circle cx="188" cy="45" r="18" fill="rgba(0,120,212,0.08)" stroke="rgba(0,120,212,0.5)" stroke-width="1.5"/>
+        <text x="188" y="42" class="label-text" style="fill:var(--cp-link);font-weight:700;">Org B</text>
+        <text x="188" y="53" class="label-text" style="fill:var(--cp-link);">Trust</text>
+        <!-- Right spokes -->
+        <line x1="206" y1="35" x2="228" y2="20" stroke="var(--cp-border-strong)" stroke-width="1.2"/>
+        <rect x="216" y="12" width="28" height="16" rx="4" class="node-box"/>
+        <line x1="206" y1="45" x2="236" y2="45" stroke="var(--cp-border-strong)" stroke-width="1.2"/>
+        <rect x="224" y="37" width="28" height="16" rx="4" class="node-box"/>
+        <!-- Right green dot -->
+        <circle cx="244" cy="20" r="4" fill="var(--cp-success)"/>
+        <text x="130" y="83" class="label-text" style="font-weight:600;fill:var(--cp-text);">Cross-org federation · No shared keys</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="use-case-title">🌐 Build & Bridge Service Mesh Across Orgs</div>
+        <span class="coverage-badge full">✓ Full</span>
+      </div>
+      <div class="use-case-desc">Extend service mesh across organizational boundaries without sharing private keys — federated trust domains.</div>
+      <div class="labs-section">
+        <div class="labs-label">Covered By</div>
+        <div class="labs-list">
+          <span class="lab-chip track-b">☸️ Track B · Lab 5 — Custom Root CA</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 6 — Two-Cluster Federation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use Case 4: Zero Trust -->
+  <div class="card">
+    <div class="card-diagram">
+      <svg width="260" height="100" viewBox="0 0 260 100">
+        <!-- Three nodes in a triangle -->
+        <rect x="96" y="8" width="68" height="28" rx="6" class="node-spire"/>
+        <text x="130" y="26" class="label-text" style="fill:var(--cp-accent);font-weight:700;">Service A</text>
+        <rect x="28" y="64" width="68" height="28" rx="6" class="node-box"/>
+        <text x="62" y="82" class="label-text">Service B</text>
+        <rect x="164" y="64" width="68" height="28" rx="6" class="node-box"/>
+        <text x="198" y="82" class="label-text">Service C</text>
+        <!-- Triangle lines -->
+        <line x1="96" y1="36" x2="62" y2="64" class="conn-line"/>
+        <line x1="164" y1="36" x2="198" y2="64" class="conn-line"/>
+        <line x1="96" y1="78" x2="164" y2="78" class="conn-line"/>
+        <!-- Locks on edges -->
+        <circle cx="72" cy="52" r="8" class="lock-circle"/>
+        <text x="72" y="55.5" style="font-size:9px;text-anchor:middle;fill:#fff;">🔒</text>
+        <circle cx="186" cy="52" r="8" class="lock-circle"/>
+        <text x="186" y="55.5" style="font-size:9px;text-anchor:middle;fill:#fff;">🔒</text>
+        <circle cx="130" cy="78" r="8" class="lock-circle"/>
+        <text x="130" y="81.5" style="font-size:9px;text-anchor:middle;fill:#fff;">🔒</text>
+        <text x="130" y="98" class="label-text" style="font-weight:600;fill:var(--cp-text);">Every path authenticated · Zero implicit trust</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="use-case-title">🛡️ Cross-Service Auth for Zero Trust</div>
+        <span class="coverage-badge full">✓ Full</span>
+      </div>
+      <div class="use-case-desc">Every service-to-service connection is cryptographically authenticated. No implicit trust — no SVID means no access.</div>
+      <div class="labs-section">
+        <div class="labs-label">Covered By</div>
+        <div class="labs-list">
+          <span class="lab-chip track-a">🐳 Track A · Lab 5 — Zero Trust Enforcement</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 2 — Node Attestation</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 3 — Workload Attestation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use Case 5: Kubernetes Bridge -->
+  <div class="card">
+    <div class="card-diagram">
+      <svg width="260" height="90" viewBox="0 0 260 90">
+        <!-- Kubernetes hub -->
+        <circle cx="72" cy="45" r="22" fill="rgba(50,108,229,0.1)" stroke="rgba(50,108,229,0.5)" stroke-width="1.5"/>
+        <text x="72" y="40" class="label-text" style="fill:#326ce5;font-weight:700;font-size:16px;">☸</text>
+        <text x="72" y="56" class="label-text" style="fill:#326ce5;">Kubernetes</text>
+        <!-- Spokes from k8s -->
+        <line x1="50" y1="35" x2="24" y2="20" stroke="rgba(50,108,229,0.4)" stroke-width="1.2"/>
+        <rect x="8" y="12" width="28" height="16" rx="4" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.35)" stroke-width="1"/>
+        <line x1="50" y1="55" x2="24" y2="68" stroke="rgba(50,108,229,0.4)" stroke-width="1.2"/>
+        <rect x="8" y="62" width="28" height="16" rx="4" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.35)" stroke-width="1"/>
+        <!-- Bridge lock -->
+        <circle cx="130" cy="45" r="10" class="lock-circle"/>
+        <text x="130" y="48.5" style="font-size:11px;text-anchor:middle;fill:#fff;">🔒</text>
+        <line x1="94" y1="45" x2="120" y2="45" class="conn-line"/>
+        <line x1="140" y1="45" x2="164" y2="45" class="conn-line"/>
+        <!-- Right hub (other platforms) -->
+        <circle cx="186" cy="45" r="22" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.4)" stroke-width="1.5"/>
+        <text x="186" y="42" class="label-text" style="fill:var(--cp-success);font-weight:700;">Other</text>
+        <text x="186" y="53" class="label-text" style="fill:var(--cp-success);">Platforms</text>
+        <!-- Right spokes -->
+        <line x1="207" y1="35" x2="230" y2="20" stroke="rgba(22,163,74,0.4)" stroke-width="1.2"/>
+        <rect x="224" y="12" width="28" height="16" rx="4" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.35)" stroke-width="1"/>
+        <line x1="207" y1="55" x2="230" y2="68" stroke="rgba(22,163,74,0.4)" stroke-width="1.2"/>
+        <rect x="224" y="62" width="28" height="16" rx="4" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.35)" stroke-width="1"/>
+        <!-- Green dots -->
+        <circle cx="238" cy="20" r="4" fill="var(--cp-success)"/>
+        <text x="130" y="82" class="label-text" style="font-weight:600;fill:var(--cp-text);">PSAT attestation · Unified identity</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="use-case-title">☸️ Bridge Kubernetes & Other Platforms</div>
+        <span class="coverage-badge full">✓ Full</span>
+      </div>
+      <div class="use-case-desc">Extend SPIFFE identity from Kubernetes to VMs, bare metal, and other clouds using a unified trust domain.</div>
+      <div class="labs-section">
+        <div class="labs-label">Covered By</div>
+        <div class="labs-list">
+          <span class="lab-chip track-b">☸️ Track B · Lab 1 — Explore Cluster</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 2 — Node Attestation (PSAT)</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 4 — ClusterSPIFFEID</span>
+          <span class="lab-chip track-b">☸️ Track B · Lab 6 — Federation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <span class="legend-title">Legend</span>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--cp-link);"></div>
+    🐳 Track A — Docker Compose (8 labs)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--cp-success);"></div>
+    ☸️ Track B — kind / Kubernetes (7 labs)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--cp-success);opacity:0.7;"></div>
+    <span class="coverage-badge full" style="font-size:0.7rem;padding:2px 8px;">✓ Full</span> — Use case fully demonstrated
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--cp-warning);opacity:0.7;"></div>
+    <span class="coverage-badge partial" style="font-size:0.7rem;padding:2px 8px;">⚠ Partial</span> — Concept taught, no dedicated lab
+  </div>
+</div>
+
+</body>
+</html>
