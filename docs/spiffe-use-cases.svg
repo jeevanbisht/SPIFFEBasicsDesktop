@@ -192,14 +192,14 @@
 
   <!-- diagram: [K8s hub] --lock-- [Other platforms hub] with spokes -->
   <!-- K8s: cx=715, Other: cx=895, lock: cx=805, card center=805 -->
-  <circle cx="710" cy="346" r="22" fill="rgba(50,108,229,0.10)" stroke="#326ce5" stroke-width="1.5"/>
+  <circle cx="710" cy="346" r="22" fill="#326ce5" fill-opacity="0.1" stroke="#326ce5" stroke-width="1.5"/>
   <text x="710" y="342" text-anchor="middle" font-size="16" fill="#326ce5" font-weight="700">&#x2388;</text>
   <text x="710" y="357" text-anchor="middle" font-size="7.5" font-weight="700" fill="#326ce5">Kubernetes</text>
   <!-- K8s left spokes -->
   <line x1="690" y1="332" x2="666" y2="318" stroke="#919191" stroke-width="1"/>
-  <rect x="652" y="310" width="26" height="14" rx="3" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.4)" stroke-width="1"/>
+  <rect x="652" y="310" width="26" height="14" rx="3" fill="#326ce5" fill-opacity="0.08" stroke="#326ce5" stroke-opacity="0.4" stroke-width="1"/>
   <line x1="690" y1="360" x2="666" y2="373" stroke="#919191" stroke-width="1"/>
-  <rect x="652" y="365" width="26" height="14" rx="3" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.4)" stroke-width="1"/>
+  <rect x="652" y="365" width="26" height="14" rx="3" fill="#326ce5" fill-opacity="0.08" stroke="#326ce5" stroke-opacity="0.4" stroke-width="1"/>
   <!-- Bridge line + lock -->
   <line x1="732" y1="346" x2="793" y2="346" stroke="#6c3fc5" stroke-width="2"/>
   <circle cx="805" cy="346" r="10" fill="#3b1f6e"/>
@@ -207,14 +207,14 @@
   <path d="M801.5,346 L801.5,342.5 a3.5,3.5,0,0,1,7,0 L808.5,346" fill="none" stroke="white" stroke-width="1.4"/>
   <line x1="817" y1="346" x2="878" y2="346" stroke="#6c3fc5" stroke-width="2"/>
   <!-- Other platforms -->
-  <circle cx="890" cy="346" r="22" fill="rgba(22,163,74,0.10)" stroke="#16a34a" stroke-width="1.5"/>
+  <circle cx="890" cy="346" r="22" fill="#16a34a" fill-opacity="0.1" stroke="#16a34a" stroke-width="1.5"/>
   <text x="890" y="342" text-anchor="middle" font-size="8"   font-weight="700" fill="#16a34a">Other</text>
   <text x="890" y="354" text-anchor="middle" font-size="7.5" fill="#16a34a">Platforms</text>
   <!-- Other right spokes -->
   <line x1="910" y1="332" x2="934" y2="318" stroke="#919191" stroke-width="1"/>
-  <rect x="922" y="310" width="26" height="14" rx="3" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.4)" stroke-width="1"/>
+  <rect x="922" y="310" width="26" height="14" rx="3" fill="#16a34a" fill-opacity="0.08" stroke="#16a34a" stroke-opacity="0.4" stroke-width="1"/>
   <line x1="910" y1="360" x2="934" y2="373" stroke="#919191" stroke-width="1"/>
-  <rect x="922" y="365" width="26" height="14" rx="3" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.4)" stroke-width="1"/>
+  <rect x="922" y="365" width="26" height="14" rx="3" fill="#16a34a" fill-opacity="0.08" stroke="#16a34a" stroke-opacity="0.4" stroke-width="1"/>
   <circle cx="948" cy="317" r="4" fill="#16a34a"/>
   <circle cx="948" cy="372" r="4" fill="#16a34a"/>
   <text x="805" y="377" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">PSAT attestation &#xb7; Unified identity</text>
