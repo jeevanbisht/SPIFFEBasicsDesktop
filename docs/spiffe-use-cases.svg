@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="'Segoe UI', Arial, sans-serif">
+
+  <!-- ====== BACKGROUND ====== -->
+  <rect width="1200" height="600" fill="#f7f4ef"/>
+
+  <!-- ====== HEADER ====== -->
+  <text x="600" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="#242424">SPIFFE Key Use Cases &#x2192; Tutorial Lab Mapping</text>
+  <text x="600" y="54" text-anchor="middle" font-size="12" fill="#5c5c5c">github.com/jeevanbisht/SPIFFEBasicsDesktop &#xb7; Track A (Docker Compose) + Track B (Kubernetes)</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 1 — 3 cards: x=15, x=410, x=805 | w=380, h=230, y=68   -->
+  <!-- ============================================================ -->
+
+  <!-- ===== CARD 1: Secure Microservices ===== -->
+  <rect x="15" y="68" width="380" height="230" rx="10" fill="#ffffff" stroke="#dedede" stroke-width="1.5"/>
+  <rect x="15" y="68" width="380" height="68" rx="10" fill="#f5f5f5"/>
+  <rect x="15" y="118" width="380" height="18" fill="#f5f5f5"/>
+
+  <!-- diagram: [SvcA] --lock-- [SPIRE] --lock-- [SvcB] -->
+  <rect x="55"  y="88" width="56" height="24" rx="5" fill="#ffffff" stroke="#919191" stroke-width="1.2"/>
+  <text x="83"  y="104" text-anchor="middle" font-size="9" fill="#5c5c5c">Service A</text>
+  <line x1="111" y1="100" x2="123" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- lock 1 -->
+  <circle cx="131" cy="100" r="8" fill="#3b1f6e"/>
+  <rect x="127.5" y="100" width="7" height="5.5" rx="1" fill="white"/>
+  <path d="M128.5,100 L128.5,97.5 a3,3,0,0,1,6,0 L134.5,100" fill="none" stroke="white" stroke-width="1.3"/>
+  <line x1="139" y1="100" x2="155" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- SPIRE box -->
+  <rect x="155" y="86" width="66" height="28" rx="5" fill="#fff0f4" stroke="#b11f4b" stroke-width="1.2"/>
+  <text x="188" y="101" text-anchor="middle" font-size="9" font-weight="700" fill="#b11f4b">SPIRE Agent</text>
+  <line x1="221" y1="100" x2="237" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- lock 2 -->
+  <circle cx="245" cy="100" r="8" fill="#3b1f6e"/>
+  <rect x="241.5" y="100" width="7" height="5.5" rx="1" fill="white"/>
+  <path d="M242.5,100 L242.5,97.5 a3,3,0,0,1,6,0 L248.5,100" fill="none" stroke="white" stroke-width="1.3"/>
+  <line x1="253" y1="100" x2="267" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <rect x="267" y="88" width="56" height="24" rx="5" fill="#ffffff" stroke="#919191" stroke-width="1.2"/>
+  <text x="295" y="104" text-anchor="middle" font-size="9" fill="#5c5c5c">Service B</text>
+  <text x="205" y="126" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">mTLS &#xb7; X.509 &#xb7; JWT</text>
+
+  <line x1="15" y1="136" x2="395" y2="136" stroke="#dedede" stroke-width="1"/>
+  <rect x="266" y="143" width="116" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="324" y="154" text-anchor="middle" font-size="9.5" font-weight="700" fill="#16a34a">&#x2713; Fully Covered</text>
+  <text x="27"  y="160" font-size="13" font-weight="700" fill="#242424">Secure Microservices Communication</text>
+  <text x="27"  y="176" font-size="11" fill="#5c5c5c">Auto-secure traffic with Envoy, X.509 PKI, or JWT.</text>
+  <text x="27"  y="190" font-size="11" fill="#5c5c5c">No passwords or API keys needed.</text>
+  <text x="27"  y="208" font-size="9" font-weight="700" fill="#6f6f6f" letter-spacing="0.8">COVERED BY</text>
+  <rect x="27"  y="213" width="136" height="16" rx="8" fill="#dff0fc" stroke="#0078d4" stroke-width="0.8"/>
+  <text x="95"  y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#0078d4">Track A: Lab 2-3-4</text>
+  <rect x="171" y="213" width="136" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="239" y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 7 Envoy</text>
+
+  <!-- ===== CARD 2: Database Auth ===== -->
+  <rect x="410" y="68" width="380" height="230" rx="10" fill="#ffffff" stroke="#dedede" stroke-width="1.5"/>
+  <rect x="410" y="68" width="380" height="68" rx="10" fill="#f5f5f5"/>
+  <rect x="410" y="118" width="380" height="18" fill="#f5f5f5"/>
+
+  <!-- diagram: [DB] --lock-- [SVID] --lock-- [Platform] -->
+  <ellipse cx="468" cy="92" rx="23" ry="9"  fill="#f5f5f5" stroke="#919191" stroke-width="1.2"/>
+  <rect    x="445"  y="92"  width="46" height="18" fill="#f5f5f5" stroke="#919191" stroke-width="1.2"/>
+  <ellipse cx="468" cy="110" rx="23" ry="9" fill="#f5f5f5" stroke="#919191" stroke-width="1.2"/>
+  <text x="468" y="103" text-anchor="middle" font-size="8" fill="#5c5c5c">Database</text>
+  <line x1="491" y1="100" x2="505" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- lock -->
+  <circle cx="513" cy="100" r="8" fill="#3b1f6e"/>
+  <rect x="509.5" y="100" width="7" height="5.5" rx="1" fill="white"/>
+  <path d="M510.5,100 L510.5,97.5 a3,3,0,0,1,6,0 L516.5,100" fill="none" stroke="white" stroke-width="1.3"/>
+  <line x1="521" y1="100" x2="537" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <rect x="537" y="88" width="56" height="24" rx="5" fill="#fff0f4" stroke="#b11f4b" stroke-width="1.2"/>
+  <text x="565" y="104" text-anchor="middle" font-size="9" font-weight="700" fill="#b11f4b">SVID</text>
+  <line x1="593" y1="100" x2="609" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- lock -->
+  <circle cx="617" cy="100" r="8" fill="#3b1f6e"/>
+  <rect x="613.5" y="100" width="7" height="5.5" rx="1" fill="white"/>
+  <path d="M614.5,100 L614.5,97.5 a3,3,0,0,1,6,0 L620.5,100" fill="none" stroke="white" stroke-width="1.3"/>
+  <line x1="625" y1="100" x2="641" y2="100" stroke="#6c3fc5" stroke-width="2"/>
+  <rect x="641" y="88" width="62" height="24" rx="5" fill="#dff0fc" stroke="#0078d4" stroke-width="1.2"/>
+  <text x="672" y="104" text-anchor="middle" font-size="9" fill="#0078d4">Platform</text>
+  <text x="575" y="126" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">No passwords &#xb7; No API keys</text>
+
+  <line x1="410" y1="136" x2="790" y2="136" stroke="#dedede" stroke-width="1"/>
+  <rect x="602" y="143" width="172" height="16" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+  <text x="688" y="154" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d97706">&#x26a0; Partial &#x2014; No DB lab yet</text>
+  <text x="422" y="160" font-size="13" font-weight="700" fill="#242424">Auth to Databases Without Passwords</text>
+  <text x="422" y="176" font-size="11" fill="#5c5c5c">Authenticate to databases and platforms using</text>
+  <text x="422" y="190" font-size="11" fill="#5c5c5c">SVID identity &#x2014; no API keys or secrets.</text>
+  <text x="422" y="208" font-size="9" font-weight="700" fill="#6f6f6f" letter-spacing="0.8">COVERED BY</text>
+  <rect x="422" y="213" width="156" height="16" rx="8" fill="#dff0fc" stroke="#0078d4" stroke-width="0.8"/>
+  <text x="500" y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#0078d4">Track A: Lab 1 &#xb7; Lab 5 &#xb7; Lab 7</text>
+  <rect x="586" y="213" width="116" height="16" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+  <text x="644" y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#d97706">No dedicated DB lab</text>
+
+  <!-- ===== CARD 3: Service Mesh / Federation ===== -->
+  <rect x="805" y="68" width="380" height="230" rx="10" fill="#ffffff" stroke="#dedede" stroke-width="1.5"/>
+  <rect x="805" y="68" width="380" height="68" rx="10" fill="#f5f5f5"/>
+  <rect x="805" y="118" width="380" height="18" fill="#f5f5f5"/>
+
+  <!-- diagram: OrgA --lock-- OrgB with spokes -->
+  <!-- OrgA: cx=868, OrgB: cx=1122, lock at cx=995 -->
+  <circle cx="868" cy="102" r="18" fill="#fff0f4" stroke="#b11f4b" stroke-width="1.5"/>
+  <text x="868" y="99"  text-anchor="middle" font-size="8"   font-weight="700" fill="#b11f4b">Org A</text>
+  <text x="868" y="110" text-anchor="middle" font-size="7.5" fill="#b11f4b">Trust</text>
+  <!-- OrgA spokes -->
+  <line x1="851" y1="91"  x2="825" y2="78"  stroke="#919191" stroke-width="1"/>
+  <rect x="810" y="70" width="26" height="14" rx="3" fill="#ffffff" stroke="#919191" stroke-width="1"/>
+  <line x1="851" y1="113" x2="825" y2="126" stroke="#919191" stroke-width="1"/>
+  <rect x="810" y="118" width="26" height="14" rx="3" fill="#ffffff" stroke="#919191" stroke-width="1"/>
+  <!-- Bridge dashed line -->
+  <line x1="886" y1="102" x2="985" y2="102" stroke="#6c3fc5" stroke-width="2" stroke-dasharray="5,3"/>
+  <!-- lock -->
+  <circle cx="995" cy="102" r="10" fill="#3b1f6e"/>
+  <rect x="990.5" y="102" width="9" height="7" rx="1.5" fill="white"/>
+  <path d="M991.5,102 L991.5,98.5 a3.5,3.5,0,0,1,7,0 L998.5,102" fill="none" stroke="white" stroke-width="1.4"/>
+  <line x1="1005" y1="102" x2="1104" y2="102" stroke="#6c3fc5" stroke-width="2" stroke-dasharray="5,3"/>
+  <!-- OrgB -->
+  <circle cx="1122" cy="102" r="18" fill="#dff0fc" stroke="#0078d4" stroke-width="1.5"/>
+  <text x="1122" y="99"  text-anchor="middle" font-size="8"   font-weight="700" fill="#0078d4">Org B</text>
+  <text x="1122" y="110" text-anchor="middle" font-size="7.5" fill="#0078d4">Trust</text>
+  <!-- OrgB spokes -->
+  <line x1="1131" y1="91"  x2="1148" y2="78"  stroke="#919191" stroke-width="1"/>
+  <rect x="1148" y="70" width="26" height="14" rx="3" fill="#ffffff" stroke="#919191" stroke-width="1"/>
+  <line x1="1131" y1="113" x2="1148" y2="126" stroke="#919191" stroke-width="1"/>
+  <rect x="1148" y="118" width="26" height="14" rx="3" fill="#ffffff" stroke="#919191" stroke-width="1"/>
+  <circle cx="1174" cy="77"  r="4" fill="#16a34a"/>
+  <circle cx="1174" cy="125" r="4" fill="#16a34a"/>
+  <text x="995" y="126" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">Cross-org federation &#xb7; No shared keys</text>
+
+  <line x1="805" y1="136" x2="1185" y2="136" stroke="#dedede" stroke-width="1"/>
+  <rect x="1058" y="143" width="116" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="1116" y="154" text-anchor="middle" font-size="9.5" font-weight="700" fill="#16a34a">&#x2713; Fully Covered</text>
+  <text x="817" y="160" font-size="13" font-weight="700" fill="#242424">Bridge Service Mesh Across Orgs</text>
+  <text x="817" y="176" font-size="11" fill="#5c5c5c">Federate trust domains across org boundaries</text>
+  <text x="817" y="190" font-size="11" fill="#5c5c5c">without sharing private keys.</text>
+  <text x="817" y="208" font-size="9" font-weight="700" fill="#6f6f6f" letter-spacing="0.8">COVERED BY</text>
+  <rect x="817" y="213" width="148" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="891" y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 5 Root CA</text>
+  <rect x="973" y="213" width="148" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="1047" y="224" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 6 Federation</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 2 — 2 cards centered: x=205, x=615 | w=380, h=230, y=312 -->
+  <!-- (205+380+30+380+205=1200)                                    -->
+  <!-- ============================================================ -->
+
+  <!-- ===== CARD 4: Zero Trust ===== -->
+  <rect x="205" y="312" width="380" height="230" rx="10" fill="#ffffff" stroke="#dedede" stroke-width="1.5"/>
+  <rect x="205" y="312" width="380" height="68" rx="10" fill="#f5f5f5"/>
+  <rect x="205" y="362" width="380" height="18" fill="#f5f5f5"/>
+
+  <!-- diagram: triangle of 3 services, card center x=395 -->
+  <!-- SvcA (top): cx=395, cy=328 | SvcB (bl): cx=340, cy=358 | SvcC (br): cx=450, cy=358 -->
+  <rect x="368" y="316" width="54" height="22" rx="4" fill="#fff0f4" stroke="#b11f4b" stroke-width="1.2"/>
+  <text x="395" y="330" text-anchor="middle" font-size="9" font-weight="700" fill="#b11f4b">Svc A</text>
+  <rect x="313" y="346" width="54" height="22" rx="4" fill="#ffffff" stroke="#919191" stroke-width="1.2"/>
+  <text x="340" y="360" text-anchor="middle" font-size="9" fill="#5c5c5c">Svc B</text>
+  <rect x="423" y="346" width="54" height="22" rx="4" fill="#ffffff" stroke="#919191" stroke-width="1.2"/>
+  <text x="450" y="360" text-anchor="middle" font-size="9" fill="#5c5c5c">Svc C</text>
+  <!-- A->B edge: lock at midpoint ~(362,342) -->
+  <line x1="381" y1="338" x2="354" y2="346" stroke="#6c3fc5" stroke-width="2"/>
+  <circle cx="365" cy="342" r="7" fill="#3b1f6e"/>
+  <rect x="361.5" y="342" width="7" height="5" rx="1" fill="white"/>
+  <path d="M362.5,342 L362.5,339.5 a2.5,2.5,0,0,1,5,0 L367.5,342" fill="none" stroke="white" stroke-width="1.2"/>
+  <!-- A->C edge: lock at midpoint ~(428,342) -->
+  <line x1="409" y1="338" x2="436" y2="346" stroke="#6c3fc5" stroke-width="2"/>
+  <circle cx="425" cy="342" r="7" fill="#3b1f6e"/>
+  <rect x="421.5" y="342" width="7" height="5" rx="1" fill="white"/>
+  <path d="M422.5,342 L422.5,339.5 a2.5,2.5,0,0,1,5,0 L427.5,342" fill="none" stroke="white" stroke-width="1.2"/>
+  <!-- B->C edge: lock at midpoint (395,357) -->
+  <line x1="367" y1="357" x2="423" y2="357" stroke="#6c3fc5" stroke-width="2"/>
+  <circle cx="395" cy="357" r="7" fill="#3b1f6e"/>
+  <rect x="391.5" y="357" width="7" height="5" rx="1" fill="white"/>
+  <path d="M392.5,357 L392.5,354.5 a2.5,2.5,0,0,1,5,0 L397.5,357" fill="none" stroke="white" stroke-width="1.2"/>
+  <text x="395" y="377" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">Every path authenticated &#xb7; Zero implicit trust</text>
+
+  <line x1="205" y1="380" x2="585" y2="380" stroke="#dedede" stroke-width="1"/>
+  <rect x="453" y="387" width="116" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="511" y="398" text-anchor="middle" font-size="9.5" font-weight="700" fill="#16a34a">&#x2713; Fully Covered</text>
+  <text x="217" y="404" font-size="13" font-weight="700" fill="#242424">Cross-Service Auth for Zero Trust</text>
+  <text x="217" y="420" font-size="11" fill="#5c5c5c">Every connection cryptographically authenticated.</text>
+  <text x="217" y="434" font-size="11" fill="#5c5c5c">No SVID = no access, enforced at TLS layer.</text>
+  <text x="217" y="452" font-size="9" font-weight="700" fill="#6f6f6f" letter-spacing="0.8">COVERED BY</text>
+  <rect x="217" y="457" width="148" height="16" rx="8" fill="#dff0fc" stroke="#0078d4" stroke-width="0.8"/>
+  <text x="291" y="468" text-anchor="middle" font-size="9.5" font-weight="600" fill="#0078d4">Track A: Lab 5 Zero Trust</text>
+  <rect x="373" y="457" width="192" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="469" y="468" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 2 &#xb7; Lab 3 Attestation</text>
+
+  <!-- ===== CARD 5: Kubernetes Bridge ===== -->
+  <rect x="615" y="312" width="380" height="230" rx="10" fill="#ffffff" stroke="#dedede" stroke-width="1.5"/>
+  <rect x="615" y="312" width="380" height="68" rx="10" fill="#f5f5f5"/>
+  <rect x="615" y="362" width="380" height="18" fill="#f5f5f5"/>
+
+  <!-- diagram: [K8s hub] --lock-- [Other platforms hub] with spokes -->
+  <!-- K8s: cx=715, Other: cx=895, lock: cx=805, card center=805 -->
+  <circle cx="710" cy="346" r="22" fill="rgba(50,108,229,0.10)" stroke="#326ce5" stroke-width="1.5"/>
+  <text x="710" y="342" text-anchor="middle" font-size="16" fill="#326ce5" font-weight="700">&#x2388;</text>
+  <text x="710" y="357" text-anchor="middle" font-size="7.5" font-weight="700" fill="#326ce5">Kubernetes</text>
+  <!-- K8s left spokes -->
+  <line x1="690" y1="332" x2="666" y2="318" stroke="#919191" stroke-width="1"/>
+  <rect x="652" y="310" width="26" height="14" rx="3" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.4)" stroke-width="1"/>
+  <line x1="690" y1="360" x2="666" y2="373" stroke="#919191" stroke-width="1"/>
+  <rect x="652" y="365" width="26" height="14" rx="3" fill="rgba(50,108,229,0.08)" stroke="rgba(50,108,229,0.4)" stroke-width="1"/>
+  <!-- Bridge line + lock -->
+  <line x1="732" y1="346" x2="793" y2="346" stroke="#6c3fc5" stroke-width="2"/>
+  <circle cx="805" cy="346" r="10" fill="#3b1f6e"/>
+  <rect x="800.5" y="346" width="9" height="7" rx="1.5" fill="white"/>
+  <path d="M801.5,346 L801.5,342.5 a3.5,3.5,0,0,1,7,0 L808.5,346" fill="none" stroke="white" stroke-width="1.4"/>
+  <line x1="817" y1="346" x2="878" y2="346" stroke="#6c3fc5" stroke-width="2"/>
+  <!-- Other platforms -->
+  <circle cx="890" cy="346" r="22" fill="rgba(22,163,74,0.10)" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="890" y="342" text-anchor="middle" font-size="8"   font-weight="700" fill="#16a34a">Other</text>
+  <text x="890" y="354" text-anchor="middle" font-size="7.5" fill="#16a34a">Platforms</text>
+  <!-- Other right spokes -->
+  <line x1="910" y1="332" x2="934" y2="318" stroke="#919191" stroke-width="1"/>
+  <rect x="922" y="310" width="26" height="14" rx="3" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.4)" stroke-width="1"/>
+  <line x1="910" y1="360" x2="934" y2="373" stroke="#919191" stroke-width="1"/>
+  <rect x="922" y="365" width="26" height="14" rx="3" fill="rgba(22,163,74,0.08)" stroke="rgba(22,163,74,0.4)" stroke-width="1"/>
+  <circle cx="948" cy="317" r="4" fill="#16a34a"/>
+  <circle cx="948" cy="372" r="4" fill="#16a34a"/>
+  <text x="805" y="377" text-anchor="middle" font-size="8" font-weight="600" fill="#5c5c5c">PSAT attestation &#xb7; Unified identity</text>
+
+  <line x1="615" y1="380" x2="995" y2="380" stroke="#dedede" stroke-width="1"/>
+  <rect x="863" y="387" width="116" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="921" y="398" text-anchor="middle" font-size="9.5" font-weight="700" fill="#16a34a">&#x2713; Fully Covered</text>
+  <text x="627" y="404" font-size="13" font-weight="700" fill="#242424">Bridge Kubernetes &amp; Other Platforms</text>
+  <text x="627" y="420" font-size="11" fill="#5c5c5c">Extend SPIFFE identity from K8s to VMs, bare</text>
+  <text x="627" y="434" font-size="11" fill="#5c5c5c">metal, and other clouds via unified trust domain.</text>
+  <text x="627" y="452" font-size="9" font-weight="700" fill="#6f6f6f" letter-spacing="0.8">COVERED BY</text>
+  <rect x="627" y="457" width="184" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="719" y="468" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 1 &#xb7; Lab 2 &#xb7; Lab 4</text>
+  <rect x="819" y="457" width="148" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="893" y="468" text-anchor="middle" font-size="9.5" font-weight="600" fill="#16a34a">Track B: Lab 6 Federation</text>
+
+  <!-- ====== LEGEND ====== -->
+  <rect x="15" y="556" width="1170" height="38" rx="8" fill="#ffffff" stroke="#dedede" stroke-width="1"/>
+  <circle cx="46" cy="575" r="5" fill="#0078d4"/>
+  <text x="56" y="579" font-size="11" fill="#5c5c5c">Track A &#x2014; Docker Compose (8 labs, Docker Desktop only)</text>
+  <circle cx="378" cy="575" r="5" fill="#16a34a"/>
+  <text x="388" y="579" font-size="11" fill="#5c5c5c">Track B &#x2014; kind / Kubernetes (7 labs, includes advanced)</text>
+  <rect x="718" y="566" width="116" height="16" rx="8" fill="#dcf7e8" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="776" y="577" text-anchor="middle" font-size="9.5" font-weight="700" fill="#16a34a">&#x2713; Fully Covered</text>
+  <rect x="844" y="566" width="136" height="16" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+  <text x="912" y="577" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d97706">&#x26a0; Partially Covered</text>
+  <text x="992" y="579" font-size="10" fill="#5c5c5c">Total: 15 labs &#xb7; No cloud &#xb7; No sign-ups &#xb7; No cost</text>
+
+</svg>
