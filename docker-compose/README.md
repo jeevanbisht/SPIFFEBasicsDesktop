@@ -8,16 +8,16 @@
 
 This lab walks you through the core SPIFFE concepts step by step:
 
-| Lab | Concept | What You'll Do |
-|-----|---------|----------------|
-| 1 | **SPIFFE Identity** | See a workload's cryptographic identity |
-| 2 | **Mutual TLS (mTLS)** | Watch two services authenticate with zero passwords |
-| 3 | **X.509 Certificates** | Inspect the actual cert with `openssl` |
-| 4 | **Trust Bundles** | Verify the certificate chain |
-| 5 | **Zero Trust** | Try to call a service without a valid identity |
-| 6 | **Automatic Rotation** | Watch SPIRE rotate certificates live |
-| 7 | **Registration** | Register a new service and see it get an identity |
-| 8 | **SPIRE Internals** | Explore the server's state — entries, agents, CAs |
+| Lab | Concept | What You'll Do | Outcome |
+|-----|---------|----------------|---------|
+| 1 | **SPIFFE Identity** | See a workload's cryptographic identity | Explain every field of an SVID |
+| 2 | **Mutual TLS (mTLS)** | Watch two services authenticate with zero passwords | Trace a full mTLS handshake |
+| 3 | **X.509 Certificates** | Inspect the actual cert with `openssl` | Find the SPIFFE ID in the SAN field |
+| 4 | **Trust Bundles** | Verify the certificate chain | Prove SPIRE signed the cert with `openssl verify` |
+| 5 | **Zero Trust** | Try to call a service without a valid identity | Observe a TLS rejection firsthand |
+| 6 | **Automatic Rotation** | Watch SPIRE rotate certificates live | Confirm serial changed, SPIFFE ID unchanged |
+| 7 | **Registration** | Register a new service and see it get an identity | Write a real entry using the SPIRE CLI |
+| 8 | **SPIRE Internals** | Explore the server's state — entries, agents, CAs | Build a complete mental model of the system |
 
 ---
 
@@ -61,6 +61,16 @@ backend           healthy   ← Has a SPIFFE identity, enforces mTLS
 
 ## Lab 1: See Your First SPIFFE Identity
 
+> 🎯 **Learning Objectives**
+> - Understand what a SPIFFE ID is and what it looks like
+> - Understand how SPIRE automatically issues identities to workloads
+> - Understand the role of the SPIRE Agent as the identity broker
+>
+> ✅ **Intended Outcomes**
+> - You can retrieve a live SVID from a running workload via a single `curl`
+> - You can read and explain each field in the SVID JSON response (`spiffeId`, `expiresAt`, `trustDomain`)
+> - You understand that short-lived, auto-rotating certificates replace passwords
+
 **Concept:** Every workload gets a cryptographic identity called an **SVID**
 (SPIFFE Verifiable Identity Document). No passwords, no API keys — just a
 certificate automatically issued by SPIRE.
@@ -88,6 +98,16 @@ You'll see:
 ---
 
 ## Lab 2: Mutual TLS — Two Services Authenticate Each Other
+
+> 🎯 **Learning Objectives**
+> - Understand how mTLS differs from one-way TLS
+> - Understand how SPIFFE SVIDs are used as TLS client certificates
+> - Understand that both sides verify each other — no shared secrets, no API keys
+>
+> ✅ **Intended Outcomes**
+> - You can make a live mTLS call and read both SPIFFE IDs in the response
+> - You understand the full handshake: frontend presents SVID → backend verifies, and vice versa
+> - You can explain why this eliminates the need for passwords or API tokens between services
 
 **Concept:** In **mTLS**, both client and server present certificates.
 The frontend proves who it is to the backend, and the backend proves who it is
@@ -125,6 +145,16 @@ curl -s http://localhost:3000/demo
 ---
 
 ## Lab 3: Inspect the Certificate with OpenSSL
+
+> 🎯 **Learning Objectives**
+> - Understand that a SPIFFE SVID is a standard X.509 certificate
+> - Understand where the SPIFFE ID lives inside the certificate (SAN URI field)
+> - Learn to use `openssl` to inspect real certificates — a transferable skill for any TLS debugging
+>
+> ✅ **Intended Outcomes**
+> - You can extract a live SVID to PEM files and locate the `URI:spiffe://...` in the SAN field
+> - You can read the certificate's TTL, issuer, and key usage with `openssl x509`
+> - You understand why the 1-hour validity window matters for security
 
 **Concept:** A SPIFFE SVID is a standard X.509 certificate. The SPIFFE ID
 lives in the **Subject Alternative Name (SAN)** URI field. Let's examine it
@@ -178,6 +208,16 @@ docker compose exec frontend openssl x509 -in /tmp/svid.0.pem -text -noout
 
 ## Lab 4: Verify the Trust Chain
 
+> 🎯 **Learning Objectives**
+> - Understand the role of SPIRE as a Certificate Authority (CA)
+> - Understand how the trust bundle allows services to verify each other without shared secrets
+> - Understand what "chaining back to a root CA" means in practice
+>
+> ✅ **Intended Outcomes**
+> - You can run `openssl verify` and get a successful `OK` result for a live SVID
+> - You can inspect the CA certificate itself and explain what it contains
+> - You understand the chain: workload SVID → signed by SPIRE CA → trusted by all members of the trust domain
+
 **Concept:** SPIRE acts as a **Certificate Authority (CA)**. Every SVID chains
 back to SPIRE's trust bundle. This is how services know to trust each other.
 
@@ -208,6 +248,16 @@ docker compose exec frontend sh -c "openssl x509 -in /tmp/bundle.0.pem -text -no
 ---
 
 ## Lab 5: Zero Trust — What Happens Without a Valid Identity?
+
+> 🎯 **Learning Objectives**
+> - Understand that zero-trust means every connection is authenticated — no implicit trust
+> - Understand how mTLS enforces identity at the transport layer, not at the application layer
+> - Understand the difference between accessing a health endpoint (open) vs a protected endpoint (mTLS)
+>
+> ✅ **Intended Outcomes**
+> - You can demonstrate a rejected connection — a call without a valid SVID is refused at the TLS handshake
+> - You can explain *why* the call was rejected (missing client certificate, not a firewall rule)
+> - You understand that SPIFFE enforcement requires no code changes in the calling service — the agent handles it
 
 **Concept:** In a zero-trust architecture, **every connection must be
 authenticated**. No valid SVID = no access. Let's prove it.
@@ -243,6 +293,16 @@ proof of identity.
 ---
 
 ## Lab 6: Watch Certificate Rotation
+
+> 🎯 **Learning Objectives**
+> - Understand that SPIRE rotates certificates automatically at ~50% of TTL
+> - Understand that rotation is transparent — services stay running, no restarts, no re-deployment
+> - Understand why short-lived certs are safer than long-lived ones (blast radius if leaked)
+>
+> ✅ **Intended Outcomes**
+> - You can capture two serial numbers before and after rotation and confirm they differ
+> - You confirm the SPIFFE ID stays the same across rotations — identity is stable, the cert is not
+> - You can read SPIRE Agent logs and identify rotation events in real time
 
 **Concept:** SPIRE automatically **rotates certificates** before they expire.
 Services never have to restart — they get fresh certs transparently.
@@ -301,6 +361,16 @@ SPIRE handles the entire certificate lifecycle.
 ---
 
 ## Lab 7: Register a New Service
+
+> 🎯 **Learning Objectives**
+> - Understand that registration entries are the authorization policy in SPIRE
+> - Understand how selectors (e.g. `unix:uid`) map a process to a SPIFFE ID
+> - Understand the admin workflow for onboarding a new service into the trust domain
+>
+> ✅ **Intended Outcomes**
+> - You can list existing entries and identify the parent ID, SPIFFE ID, and selector for each
+> - You can create a new registration entry for a fictional `inventory` service using the SPIRE CLI
+> - You understand that in production, Kubernetes selectors (`k8s:pod-label:app=...`) replace `unix:uid`
 
 **Concept:** Before a workload can get an identity, an admin must create a
 **registration entry** that maps a selector (how to identify the process) to a
@@ -371,6 +441,16 @@ Selector         : unix:uid:10003
 ---
 
 ## Lab 8: Explore SPIRE Server State with OpenSSL
+
+> 🎯 **Learning Objectives**
+> - Understand the SPIRE Server as the single source of truth — CA keys, entries, agents, trust bundle
+> - Understand how all SVIDs in a trust domain share the same Issuer but have unique serial numbers and SANs
+> - Consolidate everything learned in Labs 1–7 into a complete mental model of SPIRE's architecture
+>
+> ✅ **Intended Outcomes**
+> - You can query the server for all registered entries and attested agents via the SPIRE CLI
+> - You can compare two SVIDs (frontend vs backend) side by side and explain the similarities and differences
+> - You leave with a clear picture of the full SPIFFE/SPIRE system: CA → Agent → Workload → mTLS
 
 **Concept:** SPIRE Server is the brain — it holds the CA keys, the trust
 bundle, registration entries, and attested agent records. Let's explore.
