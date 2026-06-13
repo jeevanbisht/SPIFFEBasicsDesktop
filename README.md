@@ -1,6 +1,8 @@
-# SPIFFE & SPIRE — Standalone Hands-On Tutorial
+# SPIFFE & SPIRE Hands-On Labs — Learn Workload Identity From Scratch (Docker + Kubernetes)
 
 > **Learn workload identity from scratch on a single machine. No cloud account needed.**
+
+A free, beginner-friendly, hands-on lab series to learn **SPIFFE/SPIRE workload identity, mTLS, and zero trust** — entirely on your laptop with Docker Desktop and Kubernetes (kind). 15 step-by-step labs, no cloud, no sign-ups, no cost.
 
 [![SPIFFE](https://img.shields.io/badge/SPIFFE-Standard-blue)](https://spiffe.io)
 [![SPIRE](https://img.shields.io/badge/SPIRE-v1.9-green)](https://github.com/spiffe/spire)
@@ -21,7 +23,7 @@
 
 > 🗺️ **Visual overview:** [Key Use Cases → Lab Mapping](./docs/spiffe-use-cases.html) — see which labs cover each SPIFFE use case.
 
-![SPIFFE Key Use Cases](./docs/spiffe-use-cases.png)
+![SPIFFE & SPIRE key use cases mapped to hands-on labs — workload identity, mTLS, SVID rotation, and zero trust](./docs/spiffe-use-cases.png)
 
 After completing this tutorial, graduate to the cloud: **[SPIFFEBasics → Azure AKS deployment](https://github.com/jeevanbisht/SPIFFEBasics)**
 
