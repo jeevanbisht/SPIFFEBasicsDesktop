@@ -25,8 +25,6 @@ A free, beginner-friendly, hands-on lab series to learn **SPIFFE/SPIRE workload 
 
 ![SPIFFE & SPIRE key use cases mapped to hands-on labs — workload identity, mTLS, SVID rotation, and zero trust](./docs/spiffe-use-cases.png)
 
-After completing this tutorial, graduate to the cloud: **[SPIFFEBasics → Azure AKS deployment](https://github.com/jeevanbisht/SPIFFEBasics)**
-
 ---
 
 ## 🤔 The Problem SPIFFE/SPIRE Solves
@@ -211,8 +209,7 @@ Read concepts (10 min)
          Lab 6: [Advanced] Two-cluster SPIFFE federation
          Lab 7: [Advanced] Envoy transparent mTLS
               |
-             DONE - Ready for cloud!
-             github.com/jeevanbisht/SPIFFEBasics
+             DONE!
 ```
 
 ---
@@ -236,7 +233,6 @@ make kind-down   # Tear down Track B
 
 | Resource | What You'll Get |
 |----------|----------------|
-| [SPIFFEBasics](https://github.com/jeevanbisht/SPIFFEBasics) | AKS deployment, Azure Key Vault CA, OIDC federation |
 | [spiffe.io/docs](https://spiffe.io/docs/latest/) | Official SPIFFE specification |
 | [github.com/spiffe/spire](https://github.com/spiffe/spire) | SPIRE source code and examples |
 | [github.com/spiffe/spire-tutorials](https://github.com/spiffe/spire-tutorials) | Official SPIRE tutorials |
